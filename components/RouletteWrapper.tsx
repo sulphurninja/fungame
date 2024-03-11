@@ -478,7 +478,7 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
         </li>
 
       </div> */}
-        <div className="BETOK CANCEL flex  ml-[178%] space-x-24 ">
+        <div className="BETOK CANCEL flex  ml-[170%] space-x-24 ">
           <img src="/take final.png" className="bg- h-6  -mt-[40%]   absolute " />
 
           <Button
@@ -487,7 +487,7 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
           </Button>
         </div>
         <Button variant="gradient" gradient={{ from: '#ed6ea0', to: '#ec8c69', deg: 35 }} size="xl" onClick={() => clearBet()} >
-          <img src="/cancel.png" className="h-5 absolute -mt-[38%] ml-[182%] " />
+          <img src="/cancel.png" className="h-5 absolute -mt-[38%] ml-[176%] " />
 
         </Button>
       </div >
