@@ -123,7 +123,7 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
 
         if (timeDiff < 1) {
           // Call the getWinningNumber API only when timeToDraw is less than 1 second
-          const response = await fetch('http://localhost:3000/api/getWinningNumber');
+          const response = await fetch('https://funroulettedemo.vercel.app/api/getWinningNumber');
           const data = await response.json();
           const newWinningNumber = data.winningNumber;
           setWinningNumber(newWinningNumber);
@@ -158,7 +158,7 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
   useEffect(() => {
     const fetchLastFiveWinningNumbers = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/fetchfive');
+        const response = await fetch('https://funroulettedemo.vercel.app/api/fetchfive');
         const data = await response.json();
 
         setLastFiveWinningNumbers(data.lastFiveWinningNumbers);
@@ -525,7 +525,7 @@ export async function getServerSideProps() {
 
     // Call the getWinningNumber API only when timeToDraw is less than 1 second
     if (timeDiff < 1) {
-      const response = await fetch('http://localhost:3000/api/getWinningNumber');
+      const response = await fetch('https://funroulettedemo.vercel.app/api/getWinningNumber');
       const data = await response.json();
       winningNumber = data.winningNumber;
     }
