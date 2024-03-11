@@ -184,13 +184,31 @@ class Board extends React.Component<any, any> {
       }
       colList.push(rowList);
     }
-    // console.log(colList);
+    console.log(colList);
     return colList;
   }
 
-  onCellClick = (item: any) => {
-    this.props.onCellClick(item);
+  onCellClick = (item: Item) => {
+    const { onCellClick } = this.props;
+    const { placedChips } = this.props.chipsData;
+    const currentItemChips = placedChips.get(item);
+
+    // Log the information about the bet placed
+    console.log(`Bet placed on ${item.type} ${item.value}`);
+
+    // Log the amount of the bet placed
+    if (currentItemChips) {
+      console.log(`Amount of bet placed: ${currentItemChips}`);
+    } else {
+      console.log('No bet placed on this cell.');
+    }
+
+    // Call the original onCellClick method if provided
+    if (onCellClick) {
+      onCellClick(item);
+    }
   };
+
 
   render() {
     var currentItemChips_1_12 = this.props.chipsData.placedChips.get(
@@ -221,17 +239,18 @@ class Board extends React.Component<any, any> {
       this.other_19_36
     );
 
+    
+
     return (
       <div className="roulette-board-wrapper  -mt-[30%]    absolute overflow-visible   hideElementsTest">
 
         <div className="roulette-board   ">
-        <img src="/numbers.png" className=" ml-[40%] " />
+          {/* <img src="/numbers.png" className=" ml-[40%] " /> */}
 
           <div className="roulette-board-grid-numbers ">
+            <table className=" ">
 
-            <table>
-              
-              <tbody>
+              <tbody className="">
                 {this.numbers.map((item, index) => {
                   // console.log(this.numbers);
                   var keyId = 0;
@@ -309,11 +328,11 @@ class Board extends React.Component<any, any> {
               </tbody>
             </table>
           </div>
-          <div className="roulette-board-grid-other">
-            <table>
+          <div className="roulette-board-grid-other ">
+            <table className="">
               <tbody>
-                <tr>
-                  <td colSpan={2}></td>
+                <tr className="   ">
+                  <td className="" colSpan={2}></td>
 
 
                   <ChipComponent
@@ -347,7 +366,7 @@ class Board extends React.Component<any, any> {
                       null
                     )}
                     onCellClick={this.onCellClick} topMin={undefined} topMax={undefined} />
-                  <td></td>
+                  <td className="" ></td>
                   <ChipComponent
                     currentItemChips={currentItemChips_3_12}
                     tdKey={"td_other_3_12"}
@@ -363,7 +382,7 @@ class Board extends React.Component<any, any> {
                     )}
                     onCellClick={this.onCellClick} topMin={undefined} topMax={undefined} />
                 </tr>
-                <tr>
+                <tr className="">
                   <td colSpan={2}></td>
                   <ChipComponent
                     currentItemChips={currentItemChips_1_18}

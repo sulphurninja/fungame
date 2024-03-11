@@ -59,10 +59,10 @@ function login() {
     };
 
     return (
-        <body className="w-screen h-screen o bg-black relative">
+        <body className="w-full h-full o bg-black relative">
             <img
                 src="/login.png"
-                className="absolute   w-full h-full object-fill"
+                className="absolute   w-screen h-screen object-fill"
             />
 
             <div className="flex  justify-around absolute">

@@ -3,7 +3,7 @@ import React from "react";
 import { useEffect } from "react";
 import { rouletteData, WheelNumber } from "./Global";
 
-const Wheel = (props: { rouletteData: rouletteData, number: WheelNumber }): JSX.Element => {
+const Wheel = (props: { rouletteData: rouletteData, number: WheelNumber , winningNumber: string}): JSX.Element => {
   var totalNumbers = 38;
   var singleSpinDuration = 5000;
   var singleRotationDegree = 360 / totalNumbers;
@@ -113,12 +113,12 @@ const Wheel = (props: { rouletteData: rouletteData, number: WheelNumber }): JSX.
   }
 
   useEffect(() => {
-    var nextNubmer = props.number.next;
+    var nextNubmer = props.winningNumber;
     if (nextNubmer != null && nextNubmer !== "") {
       var nextNumberInt = parseInt(nextNubmer);
       spinWheel(nextNumberInt);
     }
-  }, [props.number]);
+  }, [props.winningNumber]);
 
   return (
     <div  className={"roulette-wheel     transformed-div "}>

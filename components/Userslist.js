@@ -70,9 +70,9 @@ export default function Userslist() {
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody className='border'>
+          <tbody className='border text-white'>
             {users.map((user) => (
-              <tr className='text-black border-2 border-black' key={user._id}>
+              <tr className='text-white border-2 border-black' key={user._id}>
                 <td>{user.userName}</td>
                 <td>{user.role}</td>
                 <td>{user.balance}</td>

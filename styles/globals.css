@@ -4,16 +4,9 @@
 
 html,
 body {
-  margin: 0;
-  padding: 0;
-}
-
-
-body {
-  font-family: sans-serif;
-  background-image: url("/public/bg.png");
-  /* -webkit-radial-gradient(50% 40%, circle farthest-corner, #527c14, #243a0a); */
+  background-image: url("/bg.png");
   background-repeat: no-repeat;
+  background-size: cover;
   user-select: none;
   touch-action: pan-y;
   -webkit-tap-highlight-color: transparent;
@@ -21,10 +14,10 @@ body {
   padding: 0;
 }
 
-#app {
+/* #app {
   contain: layout style;
   overflow: visible;
-}
+} */
 
 .transformed-div {
   transform: rotateX(50deg) rotateY(2deg);
@@ -33,6 +26,7 @@ body {
 .roulette-wheel {
   float: right;
   width: 380px;
+  
   height: 380px;
   border-radius: 100%;
   background-image: url(/public/roulette_1.jpg);
@@ -44,6 +38,7 @@ body {
   touch-action: none;
   overflow: visible;
 }
+
 
 @media screen and (max-width: 2640px) {
   .roulette-wheel {
@@ -127,27 +122,30 @@ body {
 .roulette-board {
   float: none;
   display: flow-root;
-
+  width: 780px;
+  background-size: 780px 120px ;
+  background-image: url('/numbers.png');
+   background-repeat: no-repeat;
   margin: 0 auto;
 }
 
 .roulette-board-grid-numbers {
   display: grid;
-  width: auto;
-  height: 216px;
-  margin-left: 37px;
+  width: 780px;
+  height: 77px;
+  margin-left: 5px;
   margin-right: 23px;
-  margin-top: 27px;
+  margin-top: 5px;
   margin-bottom: 17px;
 }
 
 .roulette-board-grid-other {
   display: grid;
   width: auto;
-  height: 216px;
-  margin-left: 37px;
+  height: 50px;
+  margin-left: 25px;
   margin-right: 23px;
-  margin-top: 27px;
+  margin-top: -20px;
   margin-bottom: 17px;
 }
 
@@ -173,18 +171,18 @@ ul {
 
 ul li.board-chip {
   list-style: none;
-  margin: 0 15px;
+  /* margin: 0 5px; */
   display: block;
 }
 
 ul li.board-chip div {
   position: relative;
   display: block;
-  width: 60px;
-  height: 60px;
+  width: 35px;
+  height: 35px;
   text-align: center;
   line-height: 63px;
-  background: #333;
+  cursor: pointer;
   border-radius: 50%;
   font-size: 18px;
   color: #ffff;
@@ -196,7 +194,7 @@ ul li div::before {
   content: '';
 }
 
-ul li.board-chip div::before {
+/* ul li.board-chip div::before {
   content: '';
   position: absolute;
   top: 0;
@@ -204,13 +202,13 @@ ul li.board-chip div::before {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: #ffee10;
+  background: #;
   transition: .5s;
   transform: scale(.9);
   z-index: -1;
-}
+} */
 
-ul li.board-chip div:hover::before {
+/* ul li.board-chip div:hover::before {
   transform: scale(1.1);
   box-shadow: 0 0 15px #ffee10;
 }
@@ -225,19 +223,24 @@ ul li.board-chip div.chip_selected {
   color: #ffee10;
   box-shadow: 0 0 20px #ffee10;
   text-shadow: 0 0 5px #ffee10;
-}
+} */
 
-ul li.board-chip div.chip-100 {
+/* ul li.board-chip div.chip-100 {
   background: url('/public/chip_black.png') no-repeat;
   background-size: 60px 60px;
-}
+} */
 
-ul li.board-chip div.chip-20 {
+/* ul li.board-chip div.chip-1 {
+  background: url('/1.png') no-repeat;
+  background-size: 20px 20px;
+} */
+
+/* ul li.board-chip div.chip-20 {
   background: url('/public/chip_blue.png') no-repeat;
   background-size: 60px 60px;
-}
+} */
 
-ul li.board-chip div.chip-10 {
+/* ul li.board-chip div.chip-10 {
   background: url('/public/chip_orange.png') no-repeat;
   background-size: 60px 60px;
 }
@@ -245,7 +248,7 @@ ul li.board-chip div.chip-10 {
 ul li.board-chip div.chip-5 {
   background: url('/public/chip_purple.png') no-repeat;
   background-size: 60px 60px;
-}
+} */
 
 div.chip-100-placed {
   background: url('/public/chip_black.png') no-repeat;
@@ -279,14 +282,14 @@ div.chip-5-placed {
 
 .chipValueImage {
   position: absolute;
-  width: 30px;
-  height: 30px;
+  width: 20px;
+  height: 20px;
 }
 
 .chipSum {
   position: absolute;
   font-weight: 900;
-  font-size: 20px;
+  font-size: 10px;
   -webkit-text-stroke: 1px blue;
   -webkit-text-fill-color: white;
   z-index: 10;

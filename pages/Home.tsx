@@ -1,12 +1,30 @@
 import Image from "next/image";
 import { Inter } from "next/font/google";
 import RouletteWrapper from "@/components/RouletteWrapper";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import Wrapit from "@/components/Wrapit";
+import { DataContext } from "@/store/GlobalState";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
   const [time, setTime] = useState(new Date());
+  const { state = {}, dispatch } = useContext(DataContext);
+  const { auth = {} } = state;
+
+
+  const [balance, setBalance] = useState<number | undefined>();
+
+
+  // useEffect(() => {
+  //   if (auth && auth.user && auth.user.balance) {
+  //     setBalance(auth.user.balance);
+  //     console.log(auth.user, 'user here')
+  //   }
+  //   console.log(balance, "this is my user balance bitch")
+  // }, [auth]);
+
+  // console.log(auth.user, 'user user')
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -39,31 +57,37 @@ export default function Home() {
   const handleNewNumber = (number: number) => {
     setNextNumber(number);
   };
-  console.log(nextNumber)
+
+
+  // console.log(balance, 'balance');
 
   return (
-    <div className="h-screen w-full overflow-y-hidden absolute">
+    <div className="h-screen overflow-x-hidden w-full overflow-y-hidden absolute">
       <img src='/bg.png' className='w-full h-screen absolute' />
-      <img src="/title.png" className="absolute h-10 ml-[30%]" />
+      <img src="/title.png" className="absolute h-9 ml-[34%]" />
 
       <div className="mx-6  grid grid-cols-3 ">
-        <RouletteWrapper onNewNumber={handleNewNumber} />
+        <RouletteWrapper onNewNumber={handleNewNumber} initialWinningNumber="" initialTimeToDraw="" />
 
         <div>
-          <img src="/score.png" className="absolute h-12 mt-12" />
+
           <div className="">
-            <img src="/timer.png" className="absolute h-10 mt-[12%]" />
+            <img src="/score.png" className="absolute h-12 mt-[5%]" />
+            <h1 className="text-white  mt-[7.4%]  text-xs ml-14   font-mono absolute "></h1>
+          </div>
+          <div className="">
+            <img src="/timer.png" className="absolute -ml-2 h-10 mt-[12%]" />
             <h1 className="text-white  mt-[13%] text-sm ml-20   font-mono absolute ">{timeToDraw}</h1>
           </div>
           <div className="chips">
-            <img src="/1.png" alt="" className="h-5 absolute mt-[18%] cursor-pointer hover:bg-amber-500 rounded-full hover:border-2 hover:border-amber-400" />
-            <img src="/5.png" alt="" className="h-5 absolute mt-[18%] ml-[5%]  hover:bg-amber-500 rounded-full hover:border-2 hover:border-amber-400" />
-            <img src="/10.png" alt="" className="h-5 absolute mt-[18%] ml-[10%]  hover:bg-amber-500 rounded-full hover:border-2 hover:border-amber-400" />
-            <img src="/50.png" alt="" className="h-5 absolute mt-[18%] ml-[15%]  hover:bg-amber-500 rounded-full hover:border-2 hover:border-amber-400 " />
-            <img src="/100.png" alt="" className="h-5 absolute mt-[22%]  hover:bg-amber-500 rounded-full hover:border-2 hover:border-amber-400" />
+            {/* <img src="/1.png" alt="" className="h-5 absolute mt-[18%] cursor-pointer hover:bg-amber-500 rounded-full hover:border-2 hover:border-amber-400" /> */}
+            {/* <img src="/5.png" alt="" className="h-5 absolute mt-[18%] ml-[5%]  hover:bg-amber-500 rounded-full hover:border-2 hover:border-amber-400" /> */}
+            {/* <img src="/10.png" alt="" className="h-5 absolute mt-[18%] ml-[10%]  hover:bg-amber-500 rounded-full hover:border-2 hover:border-amber-400" />
+            <img src="/50.png" alt="" className="h-5 absolute mt-[18%] ml-[15%]  hover:bg-amber-500 rounded-full hover:border-2 hover:border-amber-400 " /> */}
+            {/* <img src="/100.png" alt="" className="h-5 absolute mt-[22%]  hover:bg-amber-500 rounded-full hover:border-2 hover:border-amber-400" />
             <img src="/500.png" alt="" className="h-5 absolute mt-[22%] ml-[5%]  hover:bg-amber-500 rounded-full hover:border-2 hover:border-amber-400" />
-            <img src="/1000.png" alt="" className="h-5 absolute mt-[22%] ml-[10%]  hover:bg-amber-500 rounded-full hover:border-2 hover:border-amber-400"/>
-            <img src="/5000.png" alt="" className="h-5 absolute mt-[22%] ml-[15%]  hover:bg-amber-500 rounded-full hover:border-2 hover:border-amber-400" />
+            <img src="/1000.png" alt="" className="h-5 absolute mt-[22%] ml-[10%]  hover:bg-amber-500 rounded-full hover:border-2 hover:border-amber-400" />
+            <img src="/5000.png" alt="" className="h-5 absolute mt-[22%] ml-[15%]  hover:bg-amber-500 rounded-full hover:border-2 hover:border-amber-400" /> */}
           </div>
         </div>
 
@@ -72,10 +96,10 @@ export default function Home() {
           <h1 className="absolute text-sm  mt-[8%] text-white font-mono ml-[52%]" >{nextNumber}</h1>
 
           <img src="/resul.png" className="absolute h-9 mt-[12%] ml-[44%]" />
-          <img src="/zoom.png" className="absolute h-6 mt-[15%] ml-[45%]" />
+          <img src="/zoom.png" className="absolute h-6 mt-[15.9%] ml-[45%]" />
           <div className="flex">
-            <img src="/take final.png" className="absolute h-6 mt-[18%] ml-[42%]" />
-            <img src="/betok.png" className="absolute h-6 mt-[18%] ml-[52%]" />
+            {/* <img src="/take final.png" className="absolute h-6 mt-[18%] ml-[42%]" /> */}
+            {/* <img src="/betok.png" className="absolute h-6 mt-[18%] ml-[52%]" /> */}
 
           </div>
           {/* <img src="/status.png" className="absolute h-10 -ml-[23%] mt-[40%]" /> */}

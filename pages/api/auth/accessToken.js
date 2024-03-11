@@ -20,7 +20,8 @@ export default async (req, res) => {
             user:{
                 userName: user.userName,
                 role: user.role,
-                root: user.root
+                root: user.root,
+                balance:user.balance,
             }
         })
     } catch(err) {
