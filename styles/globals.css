@@ -12,6 +12,7 @@ body {
   -webkit-tap-highlight-color: transparent;
   margin: 0;
   padding: 0;
+  
 }
 
 /* #app {
@@ -20,16 +21,17 @@ body {
 } */
 
 .transformed-div {
-  transform: rotateX(50deg) rotateY(2deg);
+  transform: rotateX(65deg) rotateY(2deg);
+  
 }
 
 .roulette-wheel {
-  float: right;
+  float: left;
   width: 380px;
   
   height: 380px;
   border-radius: 100%;
-  background-image: url(/public/roulette_1.jpg);
+  /* background-image: url(/public/roulette_1.jpg); */
   background-size: 380px 380px;
   shape-outside: circle(190px);
   margin: 0 0 1em 1em;
@@ -77,7 +79,7 @@ body {
   will-change: transform;
 }
 
-.roulette-wheel .layer-2 {
+/* .roulette-wheel .layer-2 {
   background-image: url(/public/roulette_2.png);
 }
 
@@ -91,7 +93,7 @@ body {
 
 .roulette-wheel .layer-5 {
   background-image: url(/public/roulette_5.png);
-}
+} */
 
 .roulette-wheel svg {
   position: absolute;
@@ -135,7 +137,7 @@ body {
   height: 77px;
   margin-left: 5px;
   margin-right: 23px;
-  margin-top: 5px;
+  margin-top: 10px;
   margin-bottom: 17px;
 }
 
@@ -190,7 +192,7 @@ ul li.board-chip div {
 
 }
 
-ul li div::before {
+ul li div::before { 
   content: '';
 }
 
@@ -250,7 +252,7 @@ ul li.board-chip div.chip-5 {
   background-size: 60px 60px;
 } */
 
-div.chip-100-placed {
+/* div.chip-100-placed {
   background: url('/public/chip_black.png') no-repeat;
   background-size: 30px 30px;
 }
@@ -263,12 +265,12 @@ div.chip-20-placed {
 div.chip-10-placed {
   background: url('/public/chip_orange.png') no-repeat;
   background-size: 30px 30px;
-}
-
+} */
+/* 
 div.chip-5-placed {
   background: url('/public/chip_purple.png') no-repeat;
   background-size: 30px 30px;
-}
+} */
 
 .roulette-actions {
   display: block;
@@ -288,12 +290,26 @@ div.chip-5-placed {
 
 .chipSum {
   position: absolute;
-  font-weight: 900;
-  font-size: 10px;
-  -webkit-text-stroke: 1px blue;
-  -webkit-text-fill-color: white;
+  font-weight: 700;
+  width: 100%;
+  background-image: url('/betchip.png');
+  background-size: contain;
+  text-align: justify;
+  /* text-align: center; */
+  background-repeat: no-repeat;
+  text-indent: 4px;
+  font-size: 8px;
+  color: black;
   z-index: 10;
 }
+
+.winning-cell {
+  background-color: yellow; /* Set the background color to yellow */
+  color: black; /* Set the text color to black */
+  font-weight: bold; /* Make the text bold */
+  z-index: 20;
+}
+
 
 .auth-user {
   width: 250px;

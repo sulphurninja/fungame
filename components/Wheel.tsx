@@ -2,6 +2,7 @@ import anime from "animejs";
 import React from "react";
 import { useEffect } from "react";
 import { rouletteData, WheelNumber } from "./Global";
+import { Howl, Howler } from "howler"; // Import Howler
 
 const Wheel = (props: { rouletteData: rouletteData, number: WheelNumber , winningNumber: string}): JSX.Element => {
   var totalNumbers = 38;
@@ -22,6 +23,7 @@ const Wheel = (props: { rouletteData: rouletteData, number: WheelNumber , winnin
     var index = getRouletteIndexFromNumber(number);
     return singleRotationDegree * index;
   };
+
 
   // rotateTo randomizes the end outcome of the wheel
   // so it doesn't only end at 0 at the top
@@ -86,6 +88,7 @@ const Wheel = (props: { rouletteData: rouletteData, number: WheelNumber , winnin
         return 0;
       }
     });
+    spinningSound.play();
     anime({
       targets: [".layer-2", ".layer-4"],
       rotate: function () {
@@ -120,6 +123,10 @@ const Wheel = (props: { rouletteData: rouletteData, number: WheelNumber , winnin
     }
   }, [props.winningNumber]);
 
+  const spinningSound = new Howl({
+    src: ["/wheel.mp3"], // Provide the path to your spinning sound file
+  });
+
   return (
     <div  className={"roulette-wheel     transformed-div "}>
       {/* <img src='/roulette_1.jpg' className="w-full rounded-full  h-full" /> */}
@@ -131,7 +138,7 @@ const Wheel = (props: { rouletteData: rouletteData, number: WheelNumber , winnin
         <img src='/roulette_22.png' className="  " />
       </div>
       <div className={"layer-3"}>
-        <img src="/roulette_33.png" className="h-[80%] w-[50%] mt-[10%] ml-[25%] absolute transformed-div" />
+        <img src="/roulette_33.png" className="h-[120%] w-[50%] -mt-[9%] ml-[25%] absolute transformed-div" />
       </div>
       <div
         className={"layer-4 wheel"}

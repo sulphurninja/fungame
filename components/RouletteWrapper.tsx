@@ -7,6 +7,9 @@ import { Timer } from "easytimer.js";
 import classNames from "classnames";
 import { motion } from 'framer-motion'
 import { DataContext } from "@/store/GlobalState";
+import { Howl } from "howler";
+import Cookie from 'js-cookie';
+import { useRouter } from "next/router";
 
 interface RouletteWrapperProps {
   onNewNumber: (nextNumber: number) => void;
@@ -19,6 +22,7 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
   const [timeToDraw, setTimeToDraw] = useState(props.initialTimeToDraw);
   const [winningNumber, setWinningNumber] = useState(props.initialWinningNumber);
   const [isWheelZoomed, setIsWheelZoomed] = useState(false);
+  const [isWheelHidden, setIsWheelHidden] = useState(false);
 
   const rouletteWheelNumbers = [
     0o0, 27, 10, 25, 29, 12, 8, 19,
@@ -33,8 +37,8 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
   const [nextNumber, setNextNumber] = useState<any>();
   const [balance, setBalance] = useState<number | null>(null);
   // console.log('balance', balance, 'paisa')
-  
-  const [isChipsContainerVisible, setIsChipsContainerVisible] = useState(false);
+
+
 
   const { state = {}, dispatch } = useContext(DataContext);
   const { auth = {} } = state;
@@ -96,6 +100,15 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
   //   // Cleanup on component unmount
   //   return () => clearInterval(intervalId);
   // }, []);
+
+  const spinningSound = new Howl({
+    src: ["/ticktick.mp3"], // Provide the path to your spinning sound file
+  });
+
+  const chipSound = new Howl({
+    src: ["/chipclick.mp3"], // Provide the path to your chip sound file
+  });
+
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
@@ -116,7 +129,12 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
           0
         );
 
+
         const timeDiff = Math.floor((nextToDraw.getTime() - currentTime.getTime()) / 1000);
+        const newTimeDiff = Math.floor(
+          (nextToDraw.getTime() - currentTime.getTime()) / 1000
+        );
+        setTimeDiff(newTimeDiff);
         const minutes = Math.floor(timeDiff / 60);
         const seconds = timeDiff % 60;
         const newTimeToDraw = `${minutes}:${seconds.toString().padStart(2, '0')}`;
@@ -134,24 +152,32 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
           setIsWheelZoomed(false);
         }
 
-        if(timeDiff<=30){
-          setIsChipsContainerVisible(true);
-        } else if(timeDiff<=12){
-          setIsChipsContainerVisible(false);
+        if (timeDiff == 30) {
+          setIsWheelHidden(true);
+        } else if (timeDiff < 15) {
+          setIsWheelHidden(false);
+        }
+
+        if (timeDiff == 30 && !spinningSound.playing()) {
+          // Play the spinning sound if not already playing
+          spinningSound.play();
+        } else if (timeDiff == 2 && spinningSound.playing()) {
+          // Stop the spinning sound if playing and timeDiff is less than or equal to 2
+          spinningSound.stop();
         }
 
         setTimeToDraw(newTimeToDraw);
 
-
+        // console.log('timeDiff:', timeDiff);
 
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     }, 1000);
-
     return () => clearInterval(interval);
-  }, []);
+  }, [timeToDraw]);
 
+  // console.log('isWheelHidden:', isWheelHidden);
 
   const [lastFiveWinningNumbers, setLastFiveWinningNumbers] = useState<number[]>([]);
 
@@ -195,16 +221,37 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
     // Deduct the chip value from the balance in real-time
     setBalance((prevBalance) => (prevBalance !== null ? prevBalance - chipValue : prevBalance));
   };
+  const [isChipClicked, setIsChipClicked] = useState<any>();
+  const [totalChipSum, setTotalChipSum] = useState<number>(0);
+
+  const calculateTotalChipSum = () => {
+    let sum = 0;
+    for (const [key, value] of states.chipsData.placedChips.entries()) {
+      sum += value.sum;
+    }
+    return sum;
+  };
+
+  useEffect(() => {
+    // Update the total chip sum whenever placed chips change
+    const sum = calculateTotalChipSum();
+    setTotalChipSum(sum);
+  }, [states.chipsData]);
+
 
   const onChipClick = (chip: number | null) => {
     if (chip != null) {
       setState((prev) => ({ ...prev, chipsData: { selectedChip: chip, placedChips: states.chipsData.placedChips } }));
     }
+    chipSound.play();
+    setIsChipClicked(true)
   };
 
   const getChipClasses = (chip: number) => {
+    const isSelected = chip === states.chipsData.selectedChip;
+
     const cellClass = classNames({
-      chip_selected: chip === states.chipsData.selectedChip,
+      chip_selected: isSelected,
       "chip-5000": chip === 5000,
       "chip-1000": chip === 1000,
       "chip-500": chip === 500,
@@ -212,11 +259,12 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
       "chip-50": chip === 50,
       "chip-10": chip === 10,
       "chip-5": chip === 5,
-      "chip-1": chip === 1
+      "chip-1": chip === 1,
     });
 
     return cellClass;
   };
+
 
   // const onSpinClick = () => {
   //   const nextNumber = numberRef.current?.value;
@@ -249,8 +297,11 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
     }
   };
 
+  const [timeDiff, setTimeDiff] = useState(0);
+
   const placeBet = async () => {
     const placedChipsMap = states.chipsData.placedChips;
+
     const chips: PlacedChip[] = [];
 
     for (let key of Array.from(placedChipsMap.keys())) {
@@ -285,6 +336,15 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
   // console.log(timeToDraw, 'timetodraw')
   // console.log(state.chipsData.placedChips, 'placed chips data')
   const redNumbers: number[] = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
+  const router = useRouter();
+
+
+  const handleLogout = () => {
+    Cookie.remove('refreshtoken', { path: '/api/auth/refreshToken' })
+    localStorage.removeItem('firstLogin')
+    dispatch({ type: 'AUTH', payload: {} })
+    router.push('/')
+  }
 
 
   return (
@@ -295,7 +355,7 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
       <div className="z-30 flex space-x-2 absolute ml-[80%] text-xs mt-[13.2%]">
         {lastFiveWinningNumbers.map((number, index) => (
           <h1
-            className={`text-white z-30 ${redNumbers.includes(number) ? 'text-red-500' : ''
+            className={` z-30 ${redNumbers.includes(number) ? 'text-red-500' : 'text-white'
               }`}
             key={index}
           >
@@ -303,40 +363,44 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
           </h1>
         ))}
       </div>
-      <img src="/status.png" className="h-6 w-[80%]  absolute mt-[39.5%] z-0 ml-[8%] " />
+      <img src="/status.png" className="h-6 w-[80%]  absolute mt-[42.5%] z-0 ml-[8%] " />
+      <h1 className="h-6  text-green-400 font-mono  absolute mt-[43.2%] text-xs z-0 uppercase tracking-widest ml-[35%] " >For amusement only no cash value</h1>
+
+      <img src="/exit.png" onClick={handleLogout} className="h-5 cursor-pointer   absolute mt-[42%] z-0 ml-[87.2%] brightness-150 " />
+      <img src="/amt.png" className="h-6   absolute mt-[42%] z-0 ml-[-1.5%] brightness-150 " />
+      <h1 className="text-white absolute h-6 mt-[43.2%] font-bold z-10 ml-[3%] text-xs ">{totalChipSum}</h1>
       <div className="-mt-24  absolute">
 
         <div>
           {/** Wheel DIV */} {/**TO BE ANIMATED */}
           <motion.div
-            className="top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1"
+            className={isWheelHidden ? "hidden" : isWheelZoomed ? "  " : "   "}
             style={{ opacity: isWheelZoomed ? 1 : 1, scale: isWheelZoomed ? 1 : 1 }}
-            initial={{ opacity: 1, scale: 1 }}
-            animate={{ opacity: 1, scale: isWheelZoomed ? 1.8 : 1 }}
-            exit={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 7 }} // Adjust the duration as needed
+            // initial={{ opacity: 1, scale: 1 }}
+            // animate={{ opacity: 1, scale: isWheelZoomed ? 2.5 : 1 }}
+            // exit={{ opacity: 1, scale: 1 }}
+            transition={{ ease: 'easeOut', duration: 7 }} // Adjust the duration as needed
           >
-
-            
-            <img src="/wheelcontainer.png" className="absolute h-[40%] w-[60%] ml-[74%] mt-[32%]" />
-            <div className="scale-[54%] ml-[70%]">
+            <img src="/wheelcontainer.png" className={isWheelHidden ? "hidden" : "absolute h-[35%] w-[80%] ml-[70%] mt-[33.5%]"} />
+            <div className={isWheelHidden ? "hidden" : "scale-[73.5%] transition-opacity duration-1000 ease-in   ml-[70%]"}>
               <Wheel rouletteData={states.rouletteData} number={states.number} winningNumber={winningNumber} />
             </div>
           </motion.div>
           {/**END OF WHEEL DIV */}
 
-          <div className="w-[100%] mt-4 [100%] absolute">
+          <div className={isWheelHidden ? "absolute mt-[320%] w-[100%]" : "w-[100%] mt-4 [100%] absolute"}>
             <Board
               onCellClick={onCellClick}
               chipsData={states.chipsData}
               rouletteData={states.rouletteData}
+
             />
           </div>
 
         </div>
 
         {/***CHIPS CONTAINER */}
-        <div className="-mt-[56%] ml-52 absolute">
+        <div className={isWheelHidden ? "mt-[120%] ml-[550%]" : "-mt-[56%] ml-52 absolute"}>
 
           <div className="roulette-actions hideElementsTest">
             <ul className="-ml-20">
@@ -350,7 +414,7 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
                       className={getChipClasses(1)}
                       onClick={() => onChipClick(1)}
                     >
-                      <img src="/1.png" alt="" className=" -ml-14  w-56   hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500" />
+                      <img src="/1.png" alt="" className={` ${getChipClasses(1)} ${states.chipsData.selectedChip === 1 ? 'border-2 border-green-500 bg-green-500 rounded-full' : ''}  -ml-14  w-56 hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500`} />
 
                     </div>
                   </li>
@@ -361,7 +425,7 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
                         className={getChipClasses(5)}
                         onClick={() => onChipClick(5)}
                       >
-                        <img src="/5.png" alt="" className="    -ml-12  w-56 hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500" />
+                        <img src="/5.png" alt="" className={` ${getChipClasses(1)} ${states.chipsData.selectedChip === 5 ? 'border-2 border-green-500 bg-green-500 rounded-full' : ''}  -ml-12  w-56 hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500`} />
                       </div>
                     </span>
                   </li>
@@ -371,7 +435,7 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
                         className={getChipClasses(10)}
                         onClick={() => onChipClick(10)}
                       >
-                        <img src="/10.png" alt="" className="  -ml-10  w-56  hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500" />
+                        <img src="/10.png" alt="" className={` ${getChipClasses(1)} ${states.chipsData.selectedChip === 10 ? 'border-2 border-green-500 bg-green-500 rounded-full' : ''}  -ml-10  w-56 hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500`} />
                       </div>
                     </span>
                   </li>
@@ -381,23 +445,22 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
                         className={getChipClasses(50)}
                         onClick={() => onChipClick(50)}
                       >
-                        <img src="/50.png" alt="" className="  -ml-8  w-56 hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500" />
+                        <img src="/50.png" alt="" className={` ${getChipClasses(1)} ${states.chipsData.selectedChip === 50 ? 'border-2 border-green-500 bg-green-500 rounded-full' : ''}  -ml-8  w-56 hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500`} />
                       </div>
                     </span>
-                  </li>
-                  <li>
-
                   </li>
                 </div>
 
                 <div className="flex">
+
                   <li className={"board-chip"}>
+
                     <div
                       key={"chip_100"}
                       className={getChipClasses(100)}
                       onClick={() => onChipClick(100)}
                     >
-                      <img src="/100.png" alt="" className=" -ml-14  w-56   hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500" />
+                      <img src="/100.png" alt="" className={` ${getChipClasses(1)} ${states.chipsData.selectedChip === 100 ? 'border-2 border-green-500 bg-green-500 rounded-full' : ''}  -ml-14  w-56 hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500`} />
 
                     </div>
                   </li>
@@ -408,7 +471,7 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
                       className={getChipClasses(500)}
                       onClick={() => onChipClick(500)}
                     >
-                      <img src="/500.png" alt="" className=" -ml-12  w-56   hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500" />
+                      <img src="/500.png" alt="" className={` ${getChipClasses(1)} ${states.chipsData.selectedChip === 500 ? 'border-2 border-green-500 bg-green-500 rounded-full' : ''}  -ml-12  w-56 hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500`} />
                     </div>
                   </li>
                   <li className={"board-chip"}>
@@ -417,7 +480,7 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
                       className={getChipClasses(1000)}
                       onClick={() => onChipClick(1000)}
                     >
-                      <img src="/1000.png" alt="" className=" -ml-10  w-56   hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500" />
+                      <img src="/1000.png" alt="" className={` ${getChipClasses(1)} ${states.chipsData.selectedChip === 1000 ? 'border-2 border-green-500 bg-green-500 rounded-full' : ''}  -ml-10  w-56 hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500`} />
                     </div>
                   </li>
                   <li className={"board-chip"}>
@@ -426,7 +489,7 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
                       className={getChipClasses(5000)}
                       onClick={() => onChipClick(5000)}
                     >
-                      <img src="/5000.png" alt="" className=" -ml-8  w-56   hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500" />
+                      <img src="/5000.png" alt="" className={` ${getChipClasses(1)} ${states.chipsData.selectedChip === 5000 ? 'border-2 border-green-500 bg-green-500 rounded-full' : ''}  -ml-8  w-56 hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500`} />
                     </div>
                   </li>
                 </div>
@@ -434,7 +497,7 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
             </ul>
           </div>
         </div>
-        
+
         {/* <div className="flex gap-x-10">
         <li className={"board-chip"}>
           <span key={"chip_10"}>
@@ -478,16 +541,20 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
         </li>
 
       </div> */}
-        <div className="BETOK CANCEL flex  ml-[170%] space-x-24 ">
-          <img src="/take final.png" className="bg- h-6  -mt-[40%]   absolute " />
+        <div className="BETOK CANCEL flex  ml-[160%] space-x-24 ">
+          <img src="/take final.png" className={isWheelHidden ? "hidden" : ` h-6 -mt-[40%] absolute `} />
 
           <Button
             variant="gradient" gradient={{ from: 'orange', to: 'red' }} size="sm" onClick={() => placeBet()} >
-            <img src="/betok.png" className={classNames("bg absolute h-5 -mt-[39%] rounded-full ", { 'bg-green-400  animate-pulse': states.chipsData.placedChips.size > 0 })} />
+            {/* <img src="/betok.png" className={classNames("bg absolute h-5 -mt-[39%] rounded-full ", { 'bg-green-400  animate-pulse': states.chipsData.placedChips.size > 0 })} /> */}
+            <img src="/betok.png" className={isWheelHidden ?
+              `bg absolute h-5 -mt-[35%] ml-[450%] ${states.chipsData.placedChips.size > 0 ? 'bg-green-500  animate-pulse rounded-full' : ''}` :
+              `bg absolute h-5 -mt-[39%] rounded-full ${states.chipsData.placedChips.size > 0 ? 'bg-green-500  animate-pulse rounded-full' : ''} `
+            } />
           </Button>
         </div>
         <Button variant="gradient" gradient={{ from: '#ed6ea0', to: '#ec8c69', deg: 35 }} size="xl" onClick={() => clearBet()} >
-          <img src="/cancel.png" className="h-5 absolute -mt-[38%] ml-[176%] " />
+          <img src="/cancel.png" className={isWheelHidden ? "h-5 absolute mt-[125%] ml-[546%]" : "h-5 absolute -mt-[38%] ml-[166%] "} />
 
         </Button>
       </div >

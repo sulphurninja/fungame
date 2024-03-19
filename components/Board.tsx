@@ -1,6 +1,7 @@
 import React from "react";
 import { ValueType, Item } from "./Global";
 import Chip from "./Chip";
+import { Howl, Howler } from "howler"; // Import Howler
 import ChipComponent from "./ChipComponent";
 var classNames = require("classnames");
 
@@ -18,12 +19,17 @@ class Board extends React.Component<any, any> {
   totalNumbers = 37;
   rouletteWheenNumbers: number[];
 
+  chipPlacedSound: Howl;
+
   constructor(props: { rouletteData: { numbers: number[]; }; }) {
     super(props);
     this.onCellClick = this.onCellClick.bind(this);
 
     this.numbers = this.getNumbersList();
     this.rouletteWheenNumbers = props.rouletteData.numbers;
+    this.chipPlacedSound = new Howl({
+      src: ["/chip.mp3"] // Provide the path to your sound file
+    });
   }
 
   getRouletteColor = (number: number) => {
@@ -192,6 +198,8 @@ class Board extends React.Component<any, any> {
     const { onCellClick } = this.props;
     const { placedChips } = this.props.chipsData;
     const currentItemChips = placedChips.get(item);
+    this.chipPlacedSound.play();
+
 
     // Log the information about the bet placed
     console.log(`Bet placed on ${item.type} ${item.value}`);
@@ -211,6 +219,7 @@ class Board extends React.Component<any, any> {
 
 
   render() {
+    
     var currentItemChips_1_12 = this.props.chipsData.placedChips.get(
       this.other_1_12
     );
@@ -329,7 +338,7 @@ class Board extends React.Component<any, any> {
             </table>
           </div>
           <div className="roulette-board-grid-other ">
-            <table className="">
+            <table className=" ">
               <tbody>
                 <tr className="   ">
                   <td className="" colSpan={2}></td>
@@ -351,7 +360,7 @@ class Board extends React.Component<any, any> {
                     onCellClick={this.onCellClick} topMin={undefined} topMax={undefined} />
 
 
-                  <td></td>
+                  <td className=""></td>
                   <ChipComponent
                     currentItemChips={currentItemChips_2_12}
                     tdKey={"td_other_2_12"}
@@ -383,7 +392,7 @@ class Board extends React.Component<any, any> {
                     onCellClick={this.onCellClick} topMin={undefined} topMax={undefined} />
                 </tr>
                 <tr className="">
-                  <td colSpan={2}></td>
+                  <td colSpan={2} className=""></td>
                   <ChipComponent
                     currentItemChips={currentItemChips_1_18}
                     tdKey={"td_other_1_18"}
@@ -398,7 +407,8 @@ class Board extends React.Component<any, any> {
                       null
                     )}
                     onCellClick={this.onCellClick} topMin={undefined} topMax={undefined} />
-                  <td></td>
+                  <td className=""></td>
+                  {/* <td className="bg-black"></td> */}
                   <ChipComponent
                     currentItemChips={currentItemChips_even}
                     tdKey={"td_other_even"}
@@ -413,7 +423,7 @@ class Board extends React.Component<any, any> {
                       null
                     )}
                     onCellClick={this.onCellClick} topMin={undefined} topMax={undefined} />
-                  <td></td>
+                  <td className=""></td>
                   <ChipComponent
                     currentItemChips={currentItemChips_red}
                     tdKey={"td_other_red"}
@@ -428,7 +438,7 @@ class Board extends React.Component<any, any> {
                       null
                     )}
                     onCellClick={this.onCellClick} topMin={undefined} topMax={undefined} />
-                  <td></td>
+                  <td className=""></td>
                   <ChipComponent
                     currentItemChips={currentItemChips_black}
                     tdKey={"td_other_black"}
@@ -443,7 +453,7 @@ class Board extends React.Component<any, any> {
                       null
                     )}
                     onCellClick={this.onCellClick} topMin={undefined} topMax={undefined} />
-                  <td></td>
+                  <td className=""></td>
                   <ChipComponent
                     currentItemChips={currentItemChips_odd}
                     tdKey={"td_other_odd"}
@@ -458,7 +468,7 @@ class Board extends React.Component<any, any> {
                       null
                     )}
                     onCellClick={this.onCellClick} topMin={undefined} topMax={undefined} />
-                  <td></td>
+                  <td className=""></td>
                   <ChipComponent
                     currentItemChips={currentItemChips_19_36}
                     tdKey={"td_other_19_36"}
@@ -474,7 +484,7 @@ class Board extends React.Component<any, any> {
                     )}
                     onCellClick={this.onCellClick} topMin={undefined} topMax={undefined} />
                 </tr>
-                <tr>
+                <tr className="">
                   <td></td>
                   <td></td>
                   <td></td>
