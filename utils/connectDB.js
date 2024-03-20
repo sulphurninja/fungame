@@ -12,7 +12,7 @@ const connectDB = async () => {
     const connection = await mongoose.connect(process.env.MONGODB_URL, {
       useUnifiedTopology: true,
       useNewUrlParser: true, // Add this option to avoid deprecation warning
-      useCreateIndex: true, // Add this option to avoid deprecation warning
+   
     });
 
     console.log("Connected to MongoDB!");
