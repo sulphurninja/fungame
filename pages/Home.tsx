@@ -91,7 +91,7 @@ export default function Home() {
 
         if (timeDiff == 30) {
           setIsWheelHidden(true);
-        } else if (timeDiff < 15) {
+        } else if (timeDiff < 10) {
           setIsWheelHidden(false);
         }
 

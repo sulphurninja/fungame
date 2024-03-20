@@ -8,6 +8,7 @@ import classNames from "classnames";
 import { motion } from 'framer-motion'
 import { DataContext } from "@/store/GlobalState";
 import { Howl } from "howler";
+import axios from 'axios';
 import Cookie from 'js-cookie';
 import { useRouter } from "next/router";
 
@@ -33,22 +34,34 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
   ];
 
   const timer = new Timer();
-  const numberRef = useRef<HTMLInputElement>(null);
-  const [nextNumber, setNextNumber] = useState<any>();
-  const [balance, setBalance] = useState<number | null>(null);
-  // console.log('balance', balance, 'paisa')
-
-
-
   const { state = {}, dispatch } = useContext(DataContext);
   const { auth = {} } = state;
 
+
+  const numberRef = useRef<HTMLInputElement>(null);
+  const [nextNumber, setNextNumber] = useState<any>();
+  const [balance, setBalance] = useState<number | null>(0);
+  const [userName, setUserName] = useState(auth && auth.user && auth.user.userName ? auth.user.userName : "");
+  const [message, setMessage] = useState("For amusement only no cash value");
+
+
   useEffect(() => {
-    if (auth && auth.user && auth.user.balance) {
-      setBalance(auth.user.balance);
-      console.log(auth.user, 'user here')
+    // Retrieve username from localStorage on component mount
+    const storedUserName = localStorage.getItem("userName");
+    if (storedUserName) {
+      setUserName(storedUserName);
     }
-    console.log(balance, "this is my user balance bitch")
+  }, []);
+
+
+
+
+  useEffect(() => {
+    if (auth && auth.user && auth.user.userName) {
+      // Update state and localStorage when user is authenticated
+      setUserName(auth.user.userName);
+      localStorage.setItem("userName", auth.user.userName);
+    }
   }, [auth]);
 
 
@@ -154,7 +167,7 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
 
         if (timeDiff == 30) {
           setIsWheelHidden(true);
-        } else if (timeDiff < 15) {
+        } else if (timeDiff < 10) {
           setIsWheelHidden(false);
         }
 
@@ -177,7 +190,21 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
     return () => clearInterval(interval);
   }, [timeToDraw]);
 
+  // useEffect(() => {
+  //   const interval = setInterval(async () => {
+  //     try {
+  //      setBalance(auth.user.balance)
+  //     } catch (error) {
+  //       console.error('Error fetching balance:', error);
+  //     }
+  //   }, 1000);
+  //   return () => clearInterval(interval);
+  // }, [auth]);
+
   // console.log('isWheelHidden:', isWheelHidden);
+
+
+
 
   const [lastFiveWinningNumbers, setLastFiveWinningNumbers] = useState<number[]>([]);
 
@@ -219,13 +246,14 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
     setState((prev) => ({ ...prev, chipsData: { selectedChip: states.chipsData.selectedChip, placedChips: currentChips } }));
 
     // Deduct the chip value from the balance in real-time
-    setBalance((prevBalance) => (prevBalance !== null ? prevBalance - chipValue : prevBalance));
+    // setBalance((prevBalance) => (prevBalance !== null ? prevBalance - chipValue : prevBalance));
   };
   const [isChipClicked, setIsChipClicked] = useState<any>();
   const [totalChipSum, setTotalChipSum] = useState<number>(0);
 
   const calculateTotalChipSum = () => {
     let sum = 0;
+    setBetDetails(states.chipsData.placedChips)
     for (const [key, value] of states.chipsData.placedChips.entries()) {
       sum += value.sum;
     }
@@ -236,7 +264,11 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
     // Update the total chip sum whenever placed chips change
     const sum = calculateTotalChipSum();
     setTotalChipSum(sum);
+    const newBetDetails = Array.from(states.chipsData.placedChips.values());
+    setBetDetails(newBetDetails);
   }, [states.chipsData]);
+
+
 
 
   const onChipClick = (chip: number | null) => {
@@ -298,28 +330,57 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
   };
 
   const [timeDiff, setTimeDiff] = useState(0);
+  const [betDetails, setBetDetails] = useState({});
+
+  const [insufficient, setInsufficient] = useState(false);
 
   const placeBet = async () => {
-    const placedChipsMap = states.chipsData.placedChips;
+    try {
+      if (!balance || totalChipSum > balance) {
+        setInsufficient(true);
+        setMessage("Insufficient Balance")
+        // If balance is null or totalChipSum is greater than balance, don't place the bet
+        throw new Error('Insufficient balance to place bet');
+      }
 
-    const chips: PlacedChip[] = [];
+      if (timeDiff <= 10) {
+        // If timeDiff is less than or equal to 10, don't place the bet
+        throw new Error('Cannot place bet. Time difference is less than or equal to 10');
+      }
 
-    for (let key of Array.from(placedChipsMap.keys())) {
-      const chipsPlaced = placedChipsMap.get(key) as PlacedChip;
-      console.log("placingggggggggg chips");
-      console.log(chips);
-      console.log(chipsPlaced, 'chips placed client');
-      console.log(chips.length);
-      chips.push(chipsPlaced);
+      const response = await fetch('/api/placeBet', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userName: userName, // Assuming the username is stored in auth.user.username
+          betAmount: totalChipSum,
+          betDetails: betDetails
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const message = data.message;
+      setMessage("Your Bet has been accepted");
+      const newBalance = data.balance;
+      console.log("newBALANCE", newBalance);
+      // Display the message on the client side
+      console.log(message); // You can replace this with the logic to display the message in your UI
+      setMessage("Your Bet has been accepted");
+
+      clearBet(); // Clear placed chips
+    } catch (error) {
+      console.error('Error placing bet:', error);
+      // Handle error as needed
     }
-
-    const winnings = await calculateWinningsAPI(4, chips);
-    console.log('Winnings:', winnings);
-
-    // Replace this with your logic for placing the bet
-    console.log("Placing bet:", chips);
   };
 
+  // console.log('bet detaiuls', states.chipsData.placedChips)
   const clearBet = () => {
     setState({
       ...states,
@@ -328,8 +389,13 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
         placedChips: new Map()
       }
     });
-    setBalance(auth.user.balance); // Assuming `auth.user.balance` contains the initial balance
+    // setMessage("For amusement only no cash value");
+    // setBalance(auth.user.balance); // Assuming `auth.user.balance` contains the initial balance
   };
+
+  console.log(insufficient, "insufficient?")
+
+
 
 
 
@@ -347,11 +413,35 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
   }
 
 
+  useEffect(() => {
+    const fetchBalance = async () => {
+      try {
+        const response = await axios.get(`/api/updateBalance?userName=${auth.user.userName}`);
+        const updatedBalance = response.data.balance;
+        setBalance(updatedBalance);
+        if (states.chipsData.placedChips.size > 0)
+          setMessage("You can either make a Bet or Press the BETOK Button");
+        else if (states.chipsData.placedChips == 0)
+          setMessage("For amusement only no cash value");
+      } catch (error) {
+        console.error('Error fetching balance:', error);
+      }
+    };
+
+
+
+    const interval = setInterval(fetchBalance, 1000); // Fetch balance every 3 seconds
+    return () => clearInterval(interval);
+  }, [auth]);
+
   return (
     <>
       <h1 className="text-white text-sm mt-[8%] z-20 ml-[82%] font- font-bold absolute">{winningNumber}</h1>
       {/* <h1 className="text-white text-3xl ml-24 absolute">{timeToDraw}</h1> */}
-      <h1 className="text-white text-xs font-semibold font- ml-[5%] mt-[7.4%] z-20 absolute">{balance}.00</h1>
+      <h1 className="text-white text-xs font-semibold font- ml-[5%] mt-[7.4%] z-20 absolute">
+        {balance}.00
+      </h1>
+
       <div className="z-30 flex space-x-2 absolute ml-[80%] text-xs mt-[13.2%]">
         {lastFiveWinningNumbers.map((number, index) => (
           <h1
@@ -364,7 +454,13 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
         ))}
       </div>
       <img src="/status.png" className="h-6 w-[80%]  absolute mt-[42.5%] z-0 ml-[8%] " />
-      <h1 className="h-6  text-green-400 font-mono  absolute mt-[43.2%] text-xs z-0 uppercase tracking-widest ml-[35%] " >For amusement only no cash value</h1>
+      <h1 className={`h-6 text-green-400 font-mono absolute mt-[43.2%] text-xs z-0 uppercase tracking-widest ml-${states.chipsData.placedChips.size > 0 ? '[25%]' : '[28%]'}`}>
+        {timeDiff <= 10
+          ? "Bet Time Over"
+          : message}
+      </h1>
+
+
 
       <img src="/exit.png" onClick={handleLogout} className="h-5 cursor-pointer   absolute mt-[42%] z-0 ml-[87.2%] brightness-150 " />
       <img src="/amt.png" className="h-6   absolute mt-[42%] z-0 ml-[-1.5%] brightness-150 " />
@@ -547,10 +643,16 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
           <Button
             variant="gradient" gradient={{ from: 'orange', to: 'red' }} size="sm" onClick={() => placeBet()} >
             {/* <img src="/betok.png" className={classNames("bg absolute h-5 -mt-[39%] rounded-full ", { 'bg-green-400  animate-pulse': states.chipsData.placedChips.size > 0 })} /> */}
-            <img src="/betok.png" className={isWheelHidden ?
-              `bg absolute h-5 -mt-[35%] ml-[450%] ${states.chipsData.placedChips.size > 0 ? 'bg-green-500  animate-pulse rounded-full' : ''}` :
-              `bg absolute h-5 -mt-[39%] rounded-full ${states.chipsData.placedChips.size > 0 ? 'bg-green-500  animate-pulse rounded-full' : ''} `
-            } />
+            <img
+              src="/betok.png"
+              className={`bg absolute h-5 rounded-full ${isWheelHidden ?
+                `-mt-[35%] ml-[450%]` :
+                `-mt-[39%]`
+                } ${(timeDiff > 10 && states.chipsData.placedChips.size > 0) ?
+                  'bg-green-500 animate-pulse rounded-full' :
+                  ''
+                }`}
+            />
           </Button>
         </div>
         <Button variant="gradient" gradient={{ from: '#ed6ea0', to: '#ec8c69', deg: 35 }} size="xl" onClick={() => clearBet()} >

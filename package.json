@@ -13,7 +13,7 @@
     "@mui/material": "^5.15.10",
     "@mui/system": "^5.15.9",
     "animejs": "^3.2.2",
-    "axios": "^1.6.7",
+    "axios": "^1.6.8",
     "bcrypt": "^5.1.1",
     "classnames": "^2.5.1",
     "easytimer.js": "^4.6.0",
