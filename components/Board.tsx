@@ -253,7 +253,7 @@ class Board extends React.Component<any, any> {
     return (
       <div className="roulette-board-wrapper  -mt-[30%]    absolute overflow-visible   hideElementsTest">
 
-        <div className="roulette-board   ">
+        <div className="roulette-board w-[98vw] h-[15vw] ">
           {/* <img src="/numbers.png" className=" ml-[40%] " /> */}
 
           <div className="roulette-board-grid-numbers ">

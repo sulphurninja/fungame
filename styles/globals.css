@@ -12,7 +12,7 @@ body {
   -webkit-tap-highlight-color: transparent;
   margin: 0;
   padding: 0;
-  
+
 }
 
 /* #app {
@@ -22,13 +22,13 @@ body {
 
 .transformed-div {
   transform: rotateX(65deg) rotateY(2deg);
-  
+
 }
 
 .roulette-wheel {
   float: left;
   width: 380px;
-  
+
   height: 380px;
   border-radius: 100%;
   /* background-image: url(/public/roulette_1.jpg); */
@@ -124,18 +124,17 @@ body {
 .roulette-board {
   float: none;
   display: flow-root;
-  width: 780px;
-  background-size: 780px 120px ;
+  background-size: 100% 100%;
   background-image: url('/numbers.png');
-   background-repeat: no-repeat;
+  background-repeat: no-repeat;
   margin: 0 auto;
 }
 
 .roulette-board-grid-numbers {
   display: grid;
-  width: 780px;
-  height: 77px;
-  margin-left: 5px;
+  width: 100%;
+  height: 70%;
+  margin-left: 3%;
   margin-right: 23px;
   margin-top: 10px;
   margin-bottom: 17px;
@@ -192,7 +191,7 @@ ul li.board-chip div {
 
 }
 
-ul li div::before { 
+ul li div::before {
   content: '';
 }
 
@@ -304,9 +303,12 @@ div.chip-5-placed {
 }
 
 .winning-cell {
-  background-color: yellow; /* Set the background color to yellow */
-  color: black; /* Set the text color to black */
-  font-weight: bold; /* Make the text bold */
+  background-color: yellow;
+  /* Set the background color to yellow */
+  color: black;
+  /* Set the text color to black */
+  font-weight: bold;
+  /* Make the text bold */
   z-index: 20;
 }
 

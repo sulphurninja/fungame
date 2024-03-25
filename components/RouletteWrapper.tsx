@@ -41,6 +41,7 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
   const numberRef = useRef<HTMLInputElement>(null);
   const [nextNumber, setNextNumber] = useState<any>();
   const [balance, setBalance] = useState<number | null>(0);
+  const [winningAmt, setWinningAmt] = useState<number | null>(0);
   const [userName, setUserName] = useState(auth && auth.user && auth.user.userName ? auth.user.userName : "");
   const [message, setMessage] = useState("For amusement only no cash value");
 
@@ -322,6 +323,7 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
       }
 
       const data = await response.json();
+      setWinningAmt(data.winnings);
       return data.winnings;
     } catch (error) {
       console.error('Error calculating winnings:', error);
@@ -393,7 +395,7 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
     // setBalance(auth.user.balance); // Assuming `auth.user.balance` contains the initial balance
   };
 
-  console.log(insufficient, "insufficient?")
+  // console.log(insufficient, "insufficient?")
 
 
 
@@ -436,13 +438,13 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
 
   return (
     <>
-      <h1 className="text-white text-sm mt-[8%] z-20 ml-[82%] font- font-bold absolute">{winningNumber}</h1>
+      <h1 className="text-white text-xs mt-[8.2%] z-20 ml-[85%] font- font-bold absolute">{winningAmt} </h1>
       {/* <h1 className="text-white text-3xl ml-24 absolute">{timeToDraw}</h1> */}
-      <h1 className="text-white text-xs font-semibold font- ml-[5%] mt-[7.4%] z-20 absolute">
+      <h1 className="text-white text-[10px] font-semibold font- ml-[6%] mt-[7.4%] z-20 absolute">
         {balance}.00
       </h1>
 
-      <div className="z-30 flex space-x-2 absolute ml-[80%] text-xs mt-[13.2%]">
+      <div className="z-30 flex space-x-3 absolute ml-[82%] text-[11px] mt-[13.2%]">
         {lastFiveWinningNumbers.map((number, index) => (
           <h1
             className={` z-30 ${redNumbers.includes(number) ? 'text-red-500' : 'text-white'
@@ -454,7 +456,7 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
         ))}
       </div>
       <img src="/status.png" className="h-6 w-[80%]  absolute mt-[42.5%] z-0 ml-[8%] " />
-      <h1 className={`h-6 text-green-400 font-mono absolute mt-[43.2%] text-xs z-0 uppercase tracking-widest ml-${states.chipsData.placedChips.size > 0 ? '[25%]' : '[28%]'}`}>
+      <h1 className={`h-6 text-green-400 font-mono absolute mt-[43.2%] text-[10px] z-0 uppercase ml-[28%] tracking-widest `}>
         {timeDiff <= 10
           ? "Bet Time Over"
           : message}
@@ -470,33 +472,59 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
         <div>
           {/** Wheel DIV */} {/**TO BE ANIMATED */}
           <motion.div
-            className={isWheelHidden ? "hidden" : isWheelZoomed ? "  " : "   "}
+            className={isWheelHidden ? "" : isWheelZoomed ? "  " : "   "}
             style={{ opacity: isWheelZoomed ? 1 : 1, scale: isWheelZoomed ? 1 : 1 }}
             // initial={{ opacity: 1, scale: 1 }}
             // animate={{ opacity: 1, scale: isWheelZoomed ? 2.5 : 1 }}
             // exit={{ opacity: 1, scale: 1 }}
             transition={{ ease: 'easeOut', duration: 7 }} // Adjust the duration as needed
           >
-            <img src="/wheelcontainer.png" className={isWheelHidden ? "hidden" : "absolute h-[35%] w-[80%] ml-[70%] mt-[33.5%]"} />
-            <div className={isWheelHidden ? "hidden" : "scale-[73.5%] transition-opacity duration-1000 ease-in   ml-[70%]"}>
+            <img src="/wheelcontainer.png" className={"absolute h-[35%] w-[80%] ml-[68%] mt-[33.5%]"} />
+            <div className={"scale-[73.5%] transition-opacity duration-1000 ease-in   ml-[68%]"}>
               <Wheel rouletteData={states.rouletteData} number={states.number} winningNumber={winningNumber} />
             </div>
           </motion.div>
           {/**END OF WHEEL DIV */}
 
-          <div className={isWheelHidden ? "absolute mt-[320%] w-[100%]" : "w-[100%] mt-4 [100%] absolute"}>
+          <div className={"w-[100%] mt-4 [100%] absolute"}>
             <Board
               onCellClick={onCellClick}
               chipsData={states.chipsData}
               rouletteData={states.rouletteData}
 
             />
+            <div className="BETOK CANCEL flex   w-screen  mt-[-9%] justify-end -ml-24   space-x-24 ">
+              <img src="/take final.png" className={` h-6 -mt-[40%] absolute `} />
+
+              <Button
+                variant="gradient" gradient={{ from: 'orange', to: 'red' }} size="sm" onClick={() => placeBet()} >
+                {/* <img src="/betok.png" className={classNames("bg absolute h-5 -mt-[39%] rounded-full ", { 'bg-green-400  animate-pulse': states.chipsData.placedChips.size > 0 })} /> */}
+                <img
+                  src="/betok.png"
+                  className={`bg absolute h-5 rounded-full 
+                -mt-[39%]
+                } ${(timeDiff > 10 && states.chipsData.placedChips.size > 0) ?
+                      'bg-green-500 animate-pulse rounded-full' :
+                      ''
+                    }`}
+                />
+              </Button>
+
+            </div>
+            <div className="flex justify-end w-screen -ml-44 ">
+              <Button variant="gradient" gradient={{ from: '#ed6ea0', to: '#ec8c69', deg: 35 }} size="xl" onClick={() => clearBet()} >
+                <img src="/cancel.png" className={"h-5 absolute -mt-[32%] "} />
+
+              </Button>
+            </div>
+
           </div>
 
         </div>
 
+
         {/***CHIPS CONTAINER */}
-        <div className={isWheelHidden ? "mt-[120%] ml-[550%]" : "-mt-[56%] ml-52 absolute"}>
+        <div className={"-mt-[56%] ml-52 absolute"}>
 
           <div className="roulette-actions hideElementsTest">
             <ul className="-ml-20">
@@ -637,28 +665,8 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
         </li>
 
       </div> */}
-        <div className="BETOK CANCEL flex  ml-[160%] space-x-24 ">
-          <img src="/take final.png" className={isWheelHidden ? "hidden" : ` h-6 -mt-[40%] absolute `} />
 
-          <Button
-            variant="gradient" gradient={{ from: 'orange', to: 'red' }} size="sm" onClick={() => placeBet()} >
-            {/* <img src="/betok.png" className={classNames("bg absolute h-5 -mt-[39%] rounded-full ", { 'bg-green-400  animate-pulse': states.chipsData.placedChips.size > 0 })} /> */}
-            <img
-              src="/betok.png"
-              className={`bg absolute h-5 rounded-full ${isWheelHidden ?
-                `-mt-[35%] ml-[450%]` :
-                `-mt-[39%]`
-                } ${(timeDiff > 10 && states.chipsData.placedChips.size > 0) ?
-                  'bg-green-500 animate-pulse rounded-full' :
-                  ''
-                }`}
-            />
-          </Button>
-        </div>
-        <Button variant="gradient" gradient={{ from: '#ed6ea0', to: '#ec8c69', deg: 35 }} size="xl" onClick={() => clearBet()} >
-          <img src="/cancel.png" className={isWheelHidden ? "h-5 absolute mt-[125%] ml-[546%]" : "h-5 absolute -mt-[38%] ml-[166%] "} />
 
-        </Button>
       </div >
 
     </>

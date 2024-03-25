@@ -110,9 +110,9 @@ export default function Home() {
   return (
     <div className="h-screen overflow-x-hidden w-full   overflow-y-hidden absolute">
       {/* <img src='/bg.png' className='w-full h-screen absolute' /> */}
-      <img src="/title.png" className="absolute h-9 ml-[34%]" />
+      <img src="/title.png" className="absolute h-9 w-[33.33%] ml-[34%]" />
 
-      <div className="  grid grid-cols-3  mx-3">
+      <div className="  grid grid-cols-3 mx-2 ">
         <RouletteWrapper onNewNumber={handleNewNumber} initialWinningNumber="" initialTimeToDraw="" />
 
         <div>
@@ -123,7 +123,7 @@ export default function Home() {
           </div>
           <div className="">
             <img src="/timer.png" className={`absolute -ml-2 h-10 mt-[12%] `} />
-            <h1 className={`text-  mt-[13%] text-sm ml-20   font-mono absolute ${timeDiff <= 15 ? "animate-pulse text-amber-500" : "text-white"
+            <h1 className={`text-  mt-[13.39%] text-xs ml-20   font-mono absolute ${timeDiff <= 15 ? "animate-pulse text-amber-500" : "text-white"
               }`}>{timeToDraw}</h1>
           </div>
           <div className="chips">
@@ -143,7 +143,7 @@ export default function Home() {
           <h1 className="absolute text-sm  mt-[8%] text-white font-mono ml-[52%]" >{nextNumber}</h1>
 
           <img src="/resul.png" className="absolute h-9 mt-[12%] ml-[44%]" />
-          <img src="/zoom.png" className={isWheelHidden ? "-ml-[32%] h-8 absolute mt-[15.9%]" : "absolute h-8 mt-[15.9%] ml-[45%]"} />
+          {/* <img src="/zoom.png" className={isWheelHidden ? "-ml-[32%] h-8 absolute mt-[15.9%]" : "absolute h-8 mt-[15.9%] ml-[45%]"} /> */}
           <div className="flex">
             {/* <img src="/take final.png" className="absolute h-6 mt-[18%] ml-[42%]" /> */}
             {/* <img src="/betok.png" className="absolute h-6 mt-[18%] ml-[52%]" /> */}
