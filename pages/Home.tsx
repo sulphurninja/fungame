@@ -125,7 +125,7 @@ export default function Home() {
   useEffect(() => {
     const fetchLastFiveWinningNumbers = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/fetchfive');
+        const response = await fetch('https://funroulettedemo.vercel.app/api/fetchfive');
         const data = await response.json();
 
         setLastFiveWinningNumbers(data.lastFiveWinningNumbers);
