@@ -15,10 +15,7 @@ body {
 
 }
 
-/* #app {
-  contain: layout style;
-  overflow: visible;
-} */
+
 
 .transformed-div {
   transform: rotateX(55deg) rotateY(2deg);
@@ -46,7 +43,6 @@ body {
 @media screen and (max-width: 2640px) {
   .roulette-wheel {
     float: none;
-    /* margin: 1em auto; */
   }
 }
 
@@ -100,13 +96,9 @@ body {
 
 .roulette-wheel .layer-5 {
   background-image: url(/public/roulette_5.png);
-} */
+} 
 
-/* .roulette-wheel svg {
-  position: absolute;
-  top: 0;
-  left: 0;
-} */
+
 
 .roulette-wheel circle {
   cursor: pointer;
@@ -123,7 +115,7 @@ body {
   transform: translateY(-116px);
   top: 50%;
   left: 50%;
-  margin: -7px    ;
+  margin: -7px;
   will-change: transform;
 }
 
@@ -159,8 +151,7 @@ body {
 #app table,
 #app td,
 #app th {
-  /*border: 4px solid #fff700;
-  border-collapse: collapse;*/
+
 }
 
 
@@ -178,7 +169,7 @@ ul {
 
 ul li.board-chip {
   list-style: none;
-  /* margin: 0 5px; */
+
   display: block;
 }
 
@@ -201,87 +192,7 @@ ul li div::before {
   content: '';
 }
 
-/* ul li.board-chip div::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: #;
-  transition: .5s;
-  transform: scale(.9);
-  z-index: -1;
-} */
 
-/* ul li.board-chip div:hover::before {
-  transform: scale(1.1);
-  box-shadow: 0 0 15px #ffee10;
-}
-
-ul li.board-chip div:hover {
-  color: #ffee10;
-  box-shadow: 0 0 5px #ffee10;
-  text-shadow: 0 0 5px #ffee10;
-}
-
-ul li.board-chip div.chip_selected {
-  color: #ffee10;
-  box-shadow: 0 0 20px #ffee10;
-  text-shadow: 0 0 5px #ffee10;
-} */
-
-/* ul li.board-chip div.chip-100 {
-  background: url('/public/chip_black.png') no-repeat;
-  background-size: 60px 60px;
-} */
-
-/* ul li.board-chip div.chip-1 {
-  background: url('/1.png') no-repeat;
-  background-size: 20px 20px;
-} */
-
-/* ul li.board-chip div.chip-20 {
-  background: url('/public/chip_blue.png') no-repeat;
-  background-size: 60px 60px;
-} */
-
-/* ul li.board-chip div.chip-10 {
-  background: url('/public/chip_orange.png') no-repeat;
-  background-size: 60px 60px;
-}
-
-ul li.board-chip div.chip-5 {
-  background: url('/public/chip_purple.png') no-repeat;
-  background-size: 60px 60px;
-} */
-
-/* div.chip-100-placed {
-  background: url('/public/chip_black.png') no-repeat;
-  background-size: 30px 30px;
-}
-
-div.chip-20-placed {
-  background: url('/public/chip_blue.png') no-repeat;
-  background-size: 30px 30px;
-}
-
-div.chip-10-placed {
-  background: url('/public/chip_orange.png') no-repeat;
-  background-size: 30px 30px;
-} */
-/* 
-div.chip-5-placed {
-  background: url('/public/chip_purple.png') no-repeat;
-  background-size: 30px 30px;
-} */
-
-/* .roulette-actions {
-  display: block;
-  position: relative;
-  height: 150px;
-} */
 
 .chipValue {
   position: relative;
@@ -300,7 +211,6 @@ div.chip-5-placed {
   background-image: url('/betchip.png');
   background-size: contain;
   text-align: justify;
-  /* text-align: center; */
   background-repeat: no-repeat;
   text-indent: 4px;
   font-size: 8px;
@@ -308,15 +218,6 @@ div.chip-5-placed {
   z-index: 10;
 }
 
-.winning-number {
-  background-color: yellow;
-  /* Set the background color to yellow */
-  color: black;
-  /* Set the text color to black */
-  font-weight: bold;
-  /* Make the text bold */
-  z-index: 20;
-}
 
 
 .auth-user {
@@ -402,6 +303,3 @@ div.chip-5-placed {
   margin-bottom: 10px;
 }
 
-.hideElementsTest {
-  /* visibility: hidden; */
-}
