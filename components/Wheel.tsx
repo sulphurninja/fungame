@@ -8,7 +8,7 @@ const Wheel = (props: { rouletteData: rouletteData, number: WheelNumber , winnin
   var totalNumbers = 38;
   var singleSpinDuration = 5000;
   var singleRotationDegree = 360 / totalNumbers;
-  var lastNumber = 0;
+  var lastNumber = 0o0;
   var rouletteWheelNumbers = props.rouletteData.numbers;
   // console.log(props.rouletteData);
   // console.log(props.number);
@@ -128,23 +128,27 @@ const Wheel = (props: { rouletteData: rouletteData, number: WheelNumber , winnin
   });
 
   return (
-    <div  className={"roulette-wheel     transformed-div "}>
+    <>
+      {/* <img src="/wheelcontainer.png" className={"absolute h-[40%] mt-3 "} /> */}
+
+    <div  className={"roulette-wheel w-full ab  object-cover -mt-[6.3rem]   transformed-div "}>
       {/* <img src='/roulette_1.jpg' className="w-full rounded-full  h-full" /> */}
 
       <div
-        className={"layer-2 wheel   "}
+        className={"layer-2 wheel "}
         style={{ transform: "rotate(0deg)"}}
       >
-        <img src='/roulette_22.png' className="  " />
+        
+        {/* <img src='/roulette_22.png' className="  " /> */}
       </div>
       <div className={"layer-3"}>
-        <img src="/roulette_33.png" className="h-[120%] w-[50%] -mt-[9%] ml-[25%] absolute transformed-div" />
+        {/* <img src="/roulette_33.png" className="h-[120%] w-[50%] -mt-[9%] ml-[25%] absolute transformed-div" /> */}
       </div>
       <div
         className={"layer-4 wheel"}
         style={{ transform: "rotate(0deg)" }}
       >
-        <img src="/ring.png" className="h-[70%] w-[40%] mt-[15%] ml-[30%] absolute transformed-div" />
+        {/* <img src="/ring.png" className="h-[70%] w-[40%] mt-[15%] ml-[30%] absolute transformed-div" /> */}
 
       </div>
       <div className={"layer-5"}>
@@ -161,6 +165,8 @@ const Wheel = (props: { rouletteData: rouletteData, number: WheelNumber , winnin
         <circle cx="190" cy="190" r="190" style={{touch-action: 'none'}}></circle>
       </svg> */}
     </div>
+        
+    </>
   );
 };
 

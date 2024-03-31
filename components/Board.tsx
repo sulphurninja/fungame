@@ -21,8 +21,11 @@ class Board extends React.Component<any, any> {
 
   chipPlacedSound: Howl;
 
-  constructor(props: { rouletteData: { numbers: number[]; }; }) {
+  constructor(props: { rouletteData: { numbers: number[]; }, winningNumber: number }) {
     super(props);
+    this.state = {
+      winningNumber: null,
+    };
     this.onCellClick = this.onCellClick.bind(this);
 
     this.numbers = this.getNumbersList();
@@ -30,7 +33,24 @@ class Board extends React.Component<any, any> {
     this.chipPlacedSound = new Howl({
       src: ["/chip.mp3"] // Provide the path to your sound file
     });
+    this.updateWinningNumber(props.winningNumber);
   }
+
+  componentDidUpdate(prevProps: { winningNumber: number }) {
+    if (prevProps.winningNumber !== this.props.winningNumber) {
+      this.updateWinningNumber(this.props.winningNumber);
+    }
+  }
+
+  updateWinningNumber(newWinningNumber: number) {
+    this.setState({ winningNumber: newWinningNumber }, () => {
+      // Remove winning effect after 3 seconds
+      setTimeout(() => {
+        this.setState({ winningNumber: null });
+      }, 8000);
+    });
+  }
+
 
   getRouletteColor = (number: number) => {
     var index = this.rouletteWheenNumbers.indexOf(number);
@@ -44,6 +64,11 @@ class Board extends React.Component<any, any> {
   getCellItemFromCellItemType(type: any) { }
   getClassNamesFromCellItemType(type: ValueType, number: number | null) {
     var isEvenOdd = 0;
+    const { winningNumber } = this.state;
+    const isWinningNumber = winningNumber !== null && number === winningNumber;
+
+    // Check if the number matches the winning number
+  
     if (number != null && type === ValueType.NUMBER && number !== 0) {
       if (number % 2 === 0) {
         isEvenOdd = 1;
@@ -54,6 +79,7 @@ class Board extends React.Component<any, any> {
     let numberValue = "value-" + number;
     var cellClass = classNames({
       //[`${numberValue}`]: true,
+      "animate-pulse border bg-green-600 border-green-600 absolute scale-[505%]": isWinningNumber,
       "board-cell-number": type === ValueType.NUMBER,
       "board-cell-double-split": type === ValueType.DOUBLE_SPLIT,
       "board-cell-quad-split": type === ValueType.QUAD_SPLIT,
@@ -76,6 +102,7 @@ class Board extends React.Component<any, any> {
       "board-cell-number-3-12":
         type === ValueType.NUMBERS_3_12 ||
         (number !== null && number % 3 === 1 && type === ValueType.NUMBER),
+        
       "board-cell-red":
         type === ValueType.RED ||
         (number !== null && this.getRouletteColor(number) === "red" && type === ValueType.NUMBER),
@@ -190,7 +217,7 @@ class Board extends React.Component<any, any> {
       }
       colList.push(rowList);
     }
-    console.log(colList);
+    // console.log(colList);
     return colList;
   }
 
@@ -256,10 +283,10 @@ class Board extends React.Component<any, any> {
         <div className="roulette-board w-[98vw] h-[15vw] ">
           {/* <img src="/numbers.png" className=" ml-[40%] " /> */}
 
-          <div className="roulette-board-grid-numbers ">
+          <div className="roulette-board-grid-numbers gap-y-2 ">
             <table className=" ">
 
-              <tbody className="">
+              <tbody className="  ">
                 {this.numbers.map((item, index) => {
                   // console.log(this.numbers);
                   var keyId = 0;

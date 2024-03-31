@@ -20,11 +20,6 @@ interface RouletteWrapperProps {
 
 const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
 
-  const [timeToDraw, setTimeToDraw] = useState(props.initialTimeToDraw);
-  const [winningNumber, setWinningNumber] = useState(props.initialWinningNumber);
-  const [isWheelZoomed, setIsWheelZoomed] = useState(false);
-  const [isWheelHidden, setIsWheelHidden] = useState(false);
-
   const rouletteWheelNumbers = [
     0o0, 27, 10, 25, 29, 12, 8, 19,
     31, 18, 6, 21, 33, 16, 4,
@@ -33,13 +28,9 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
     34, 15, 3, 24, 36, 13, 1
   ];
 
-  const timer = new Timer();
   const { state = {}, dispatch } = useContext(DataContext);
   const { auth = {} } = state;
 
-
-  const numberRef = useRef<HTMLInputElement>(null);
-  const [nextNumber, setNextNumber] = useState<any>();
   const [balance, setBalance] = useState<number | null>(0);
   const [winningAmt, setWinningAmt] = useState<number | null>(0);
   const [userName, setUserName] = useState(auth && auth.user && auth.user.userName ? auth.user.userName : "");
@@ -92,29 +83,6 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
 
   const blackNumbers = [2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 29, 28, 31, 33, 35];
 
-  // useEffect(() => {
-  //   const secondsUntilNextDraw = getSecondsUntilNextDraw();
-  //   setState((prev) => ({ ...prev, countdownSeconds: secondsUntilNextDraw }));
-
-  //   // Use the callback function with setInterval to access the current state correctly
-  //   const intervalId = setInterval(() => {
-  //     setState((prev) => {
-  //       const countdownSeconds = prev.countdownSeconds - 1;
-
-  //       if (countdownSeconds <= 0) {
-  //         // Spin the wheel when countdown reaches 0
-  //         const nextNumber = getNextNumberBasedOnTime();
-  //         return { ...prev, number: { next: nextNumber }, countdownSeconds: 60 };
-  //       } else {
-  //         return { ...prev, countdownSeconds };
-  //       }
-  //     });
-  //   }, 1000);
-
-  //   // Cleanup on component unmount
-  //   return () => clearInterval(intervalId);
-  // }, []);
-
   const spinningSound = new Howl({
     src: ["/ticktick.mp3"], // Provide the path to your spinning sound file
   });
@@ -123,87 +91,57 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
     src: ["/chipclick.mp3"], // Provide the path to your chip sound file
   });
 
+  const [timeDiff, setTimeDiff] = useState(0);
+  const [timeToDraw, setTimeToDraw] = useState(props.initialTimeToDraw);
+  const [winningNumber, setWinningNumber] = useState(props.initialWinningNumber);
+  const [isWheelZoomed, setIsWheelZoomed] = useState(false);
+  const [isWheelHidden, setIsWheelHidden] = useState(false);
+
   useEffect(() => {
-    const interval = setInterval(async () => {
+    const fetchTimeDiff = async () => {
       try {
-        const currentTime = new Date();
-        const currentMinute = currentTime.toLocaleTimeString('en-US', {
-          hour12: false,
-          hour: '2-digit',
-          minute: '2-digit',
-        });
-
-        const nextToDraw = new Date(
-          currentTime.getFullYear(),
-          currentTime.getMonth(),
-          currentTime.getDate(),
-          currentTime.getHours(),
-          currentTime.getMinutes() + 1,
-          0,
-          0
-        );
-
-
-        const timeDiff = Math.floor((nextToDraw.getTime() - currentTime.getTime()) / 1000);
-        const newTimeDiff = Math.floor(
-          (nextToDraw.getTime() - currentTime.getTime()) / 1000
-        );
+        const response = await fetch('/api/timer');
+        const data = await response.json();
+        const newTimeDiff = data.timeDiff;
         setTimeDiff(newTimeDiff);
-        const minutes = Math.floor(timeDiff / 60);
-        const seconds = timeDiff % 60;
-        const newTimeToDraw = `${minutes}:${seconds.toString().padStart(2, '0')}`;
 
-        if (timeDiff < 1) {
+        const minutes = Math.floor(newTimeDiff / 60);
+        const seconds = newTimeDiff % 60;
+        const newTimeToDraw = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        setTimeToDraw(newTimeToDraw);
+
+        if (newTimeDiff < 1) {
           // Call the getWinningNumber API only when timeToDraw is less than 1 second
-          const response = await fetch('https://funroulettedemo.vercel.app/api/getWinningNumber');
-          const data = await response.json();
-          const newWinningNumber = data.winningNumber;
+          const winningNumberResponse = await fetch('http://localhost:3000/api/getWinningNumber');
+          const winningNumberData = await winningNumberResponse.json();
+          const newWinningNumber = winningNumberData.winningNumber;
           setWinningNumber(newWinningNumber);
+          console.log(winningNumber, 'winningnumberbbi')
           setIsWheelZoomed(true);
         }
 
-        if (timeDiff >= 54) {
+        if (newTimeDiff >= 54) {
           setIsWheelZoomed(false);
         }
 
-        if (timeDiff == 30) {
+
+        if (newTimeDiff === 30) {
           setIsWheelHidden(true);
-        } else if (timeDiff < 10) {
+        } else if (newTimeDiff < 10) {
           setIsWheelHidden(false);
         }
 
-        if (timeDiff == 30 && !spinningSound.playing()) {
-          // Play the spinning sound if not already playing
-          spinningSound.play();
-        } else if (timeDiff == 2 && spinningSound.playing()) {
-          // Stop the spinning sound if playing and timeDiff is less than or equal to 2
-          spinningSound.stop();
-        }
-
-        setTimeToDraw(newTimeToDraw);
-
-        // console.log('timeDiff:', timeDiff);
-
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching time:', error);
       }
-    }, 1000);
+    };
+
+    fetchTimeDiff();
+
+    const interval = setInterval(fetchTimeDiff, 1000); // Fetch time difference periodically
+
     return () => clearInterval(interval);
-  }, [timeToDraw]);
-
-  // useEffect(() => {
-  //   const interval = setInterval(async () => {
-  //     try {
-  //      setBalance(auth.user.balance)
-  //     } catch (error) {
-  //       console.error('Error fetching balance:', error);
-  //     }
-  //   }, 1000);
-  //   return () => clearInterval(interval);
-  // }, [auth]);
-
-  // console.log('isWheelHidden:', isWheelHidden);
-
+  }, []);
 
 
 
@@ -212,7 +150,7 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
   useEffect(() => {
     const fetchLastFiveWinningNumbers = async () => {
       try {
-        const response = await fetch('https://funroulettedemo.vercel.app/api/fetchfive');
+        const response = await fetch('http://localhost:3000/api/fetchfive');
         const data = await response.json();
 
         setLastFiveWinningNumbers(data.lastFiveWinningNumbers);
@@ -331,7 +269,7 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
     }
   };
 
-  const [timeDiff, setTimeDiff] = useState(0);
+
   const [betDetails, setBetDetails] = useState({});
 
   const [insufficient, setInsufficient] = useState(false);
@@ -437,192 +375,182 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
   }, [auth]);
 
   return (
-    <>
-      <h1 className="text-white text-xs mt-[8.2%] z-20 ml-[85%] font- font-bold absolute">{winningAmt} </h1>
-      {/* <h1 className="text-white text-3xl ml-24 absolute">{timeToDraw}</h1> */}
-      <h1 className="text-white text-[10px] font-semibold font- ml-[6%] mt-[7.4%] z-20 absolute">
-        {balance}.00
-      </h1>
 
-      <div className="z-30 flex space-x-3 absolute ml-[82%] text-[11px] mt-[13.2%]">
-        {lastFiveWinningNumbers.map((number, index) => (
-          <h1
-            className={` z-30 ${redNumbers.includes(number) ? 'text-red-500' : 'text-white'
-              }`}
-            key={index}
-          >
-            {number}
-          </h1>
-        ))}
-      </div>
-      <img src="/status.png" className="h-6 w-[80%]  absolute mt-[42.5%] z-0 ml-[8%] " />
-      <h1 className={`h-6 text-green-400 font-mono absolute mt-[43.2%] text-[10px] z-0 uppercase ml-[28%] tracking-widest `}>
-        {timeDiff <= 10
-          ? "Bet Time Over"
-          : message}
-      </h1>
+    <div className=" w-full h-full">
+      <div className={"absolute ml-[16.5%]    mt-[15.9%]    "}>
+
+        <div className="">
+          <ul className="">
 
 
+            <div>
+              <div className="flex">
+                <li className={"board-chip"}>
+                  <div
+                    key={"chip_1"}
+                    className={getChipClasses(1)}
+                    onClick={() => onChipClick(1)}
+                  >
+                    <img src="/1.png" alt="" className={` ${getChipClasses(1)} ${states.chipsData.selectedChip === 1 ? 'border-2 border-green-500 bg-green-500 rounded-full' : ''}  -ml-14  w-56 hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500`} />
 
-      <img src="/exit.png" onClick={handleLogout} className="h-5 cursor-pointer   absolute mt-[42%] z-0 ml-[87.2%] brightness-150 " />
-      <img src="/amt.png" className="h-6   absolute mt-[42%] z-0 ml-[-1.5%] brightness-150 " />
-      <h1 className="text-white absolute h-6 mt-[43.2%] font-bold z-10 ml-[3%] text-xs ">{totalChipSum}</h1>
-      <div className="-mt-24  absolute">
+                  </div>
+                </li>
 
-        <div>
-          {/** Wheel DIV */} {/**TO BE ANIMATED */}
-          <motion.div
-            className={isWheelHidden ? "" : isWheelZoomed ? "  " : "   "}
-            style={{ opacity: isWheelZoomed ? 1 : 1, scale: isWheelZoomed ? 1 : 1 }}
-            // initial={{ opacity: 1, scale: 1 }}
-            // animate={{ opacity: 1, scale: isWheelZoomed ? 2.5 : 1 }}
-            // exit={{ opacity: 1, scale: 1 }}
-            transition={{ ease: 'easeOut', duration: 7 }} // Adjust the duration as needed
-          >
-            <img src="/wheelcontainer.png" className={"absolute h-[35%] w-[80%] ml-[68%] mt-[33.5%]"} />
-            <div className={"scale-[73.5%] transition-opacity duration-1000 ease-in   ml-[68%]"}>
-              <Wheel rouletteData={states.rouletteData} number={states.number} winningNumber={winningNumber} />
-            </div>
-          </motion.div>
-          {/**END OF WHEEL DIV */}
-
-          <div className={"w-[100%] mt-4 [100%] absolute"}>
-            <Board
-              onCellClick={onCellClick}
-              chipsData={states.chipsData}
-              rouletteData={states.rouletteData}
-
-            />
-            <div className="BETOK CANCEL flex   w-screen  mt-[-9%] justify-end -ml-24   space-x-24 ">
-              <img src="/take final.png" className={` h-6 -mt-[40%] absolute `} />
-
-              <Button
-                variant="gradient" gradient={{ from: 'orange', to: 'red' }} size="sm" onClick={() => placeBet()} >
-                {/* <img src="/betok.png" className={classNames("bg absolute h-5 -mt-[39%] rounded-full ", { 'bg-green-400  animate-pulse': states.chipsData.placedChips.size > 0 })} /> */}
-                <img
-                  src="/betok.png"
-                  className={`bg absolute h-5 rounded-full 
-                -mt-[39%]
-                } ${(timeDiff > 10 && states.chipsData.placedChips.size > 0) ?
-                      'bg-green-500 animate-pulse rounded-full' :
-                      ''
-                    }`}
-                />
-              </Button>
-
-            </div>
-            <div className="flex justify-end w-screen -ml-44 ">
-              <Button variant="gradient" gradient={{ from: '#ed6ea0', to: '#ec8c69', deg: 35 }} size="xl" onClick={() => clearBet()} >
-                <img src="/cancel.png" className={"h-5 absolute -mt-[32%] "} />
-
-              </Button>
-            </div>
-
-          </div>
-
-        </div>
-
-
-        {/***CHIPS CONTAINER */}
-        <div className={"-mt-[56%] ml-52 absolute"}>
-
-          <div className="roulette-actions hideElementsTest">
-            <ul className="-ml-20">
-
-
-              <div>
-                <div className="flex">
-                  <li className={"board-chip"}>
+                <li className={"board-chip"}>
+                  <span key={"chip_5"}>
                     <div
-                      key={"chip_1"}
-                      className={getChipClasses(1)}
-                      onClick={() => onChipClick(1)}
+                      className={getChipClasses(5)}
+                      onClick={() => onChipClick(5)}
                     >
-                      <img src="/1.png" alt="" className={` ${getChipClasses(1)} ${states.chipsData.selectedChip === 1 ? 'border-2 border-green-500 bg-green-500 rounded-full' : ''}  -ml-14  w-56 hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500`} />
-
+                      <img src="/5.png" alt="" className={` ${getChipClasses(1)} ${states.chipsData.selectedChip === 5 ? 'border-2 border-green-500 bg-green-500 rounded-full' : ''}  -ml-12  w-56 hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500`} />
                     </div>
-                  </li>
-
-                  <li className={"board-chip"}>
-                    <span key={"chip_5"}>
-                      <div
-                        className={getChipClasses(5)}
-                        onClick={() => onChipClick(5)}
-                      >
-                        <img src="/5.png" alt="" className={` ${getChipClasses(1)} ${states.chipsData.selectedChip === 5 ? 'border-2 border-green-500 bg-green-500 rounded-full' : ''}  -ml-12  w-56 hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500`} />
-                      </div>
-                    </span>
-                  </li>
-                  <li className={"board-chip"}>
-                    <span key={"chip_10"}>
-                      <div
-                        className={getChipClasses(10)}
-                        onClick={() => onChipClick(10)}
-                      >
-                        <img src="/10.png" alt="" className={` ${getChipClasses(1)} ${states.chipsData.selectedChip === 10 ? 'border-2 border-green-500 bg-green-500 rounded-full' : ''}  -ml-10  w-56 hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500`} />
-                      </div>
-                    </span>
-                  </li>
-                  <li className={"board-chip"}>
-                    <span key={"chip_50"}>
-                      <div
-                        className={getChipClasses(50)}
-                        onClick={() => onChipClick(50)}
-                      >
-                        <img src="/50.png" alt="" className={` ${getChipClasses(1)} ${states.chipsData.selectedChip === 50 ? 'border-2 border-green-500 bg-green-500 rounded-full' : ''}  -ml-8  w-56 hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500`} />
-                      </div>
-                    </span>
-                  </li>
-                </div>
-
-                <div className="flex">
-
-                  <li className={"board-chip"}>
-
+                  </span>
+                </li>
+                <li className={"board-chip"}>
+                  <span key={"chip_10"}>
                     <div
-                      key={"chip_100"}
-                      className={getChipClasses(100)}
-                      onClick={() => onChipClick(100)}
+                      className={getChipClasses(10)}
+                      onClick={() => onChipClick(10)}
                     >
-                      <img src="/100.png" alt="" className={` ${getChipClasses(1)} ${states.chipsData.selectedChip === 100 ? 'border-2 border-green-500 bg-green-500 rounded-full' : ''}  -ml-14  w-56 hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500`} />
-
+                      <img src="/10.png" alt="" className={` ${getChipClasses(1)} ${states.chipsData.selectedChip === 10 ? 'border-2 border-green-500 bg-green-500 rounded-full' : ''}  -ml-10  w-56 hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500`} />
                     </div>
-                  </li>
-
-                  <li className={"board-chip"}>
+                  </span>
+                </li>
+                <li className={"board-chip"}>
+                  <span key={"chip_50"}>
                     <div
-                      key={"chip_500"}
-                      className={getChipClasses(500)}
-                      onClick={() => onChipClick(500)}
+                      className={getChipClasses(50)}
+                      onClick={() => onChipClick(50)}
                     >
-                      <img src="/500.png" alt="" className={` ${getChipClasses(1)} ${states.chipsData.selectedChip === 500 ? 'border-2 border-green-500 bg-green-500 rounded-full' : ''}  -ml-12  w-56 hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500`} />
+                      <img src="/50.png" alt="" className={` ${getChipClasses(1)} ${states.chipsData.selectedChip === 50 ? 'border-2 border-green-500 bg-green-500 rounded-full' : ''}  -ml-8  w-56 hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500`} />
                     </div>
-                  </li>
-                  <li className={"board-chip"}>
-                    <div
-                      key={"chip_1000"}
-                      className={getChipClasses(1000)}
-                      onClick={() => onChipClick(1000)}
-                    >
-                      <img src="/1000.png" alt="" className={` ${getChipClasses(1)} ${states.chipsData.selectedChip === 1000 ? 'border-2 border-green-500 bg-green-500 rounded-full' : ''}  -ml-10  w-56 hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500`} />
-                    </div>
-                  </li>
-                  <li className={"board-chip"}>
-                    <div
-                      key={"chip_5000"}
-                      className={getChipClasses(5000)}
-                      onClick={() => onChipClick(5000)}
-                    >
-                      <img src="/5000.png" alt="" className={` ${getChipClasses(1)} ${states.chipsData.selectedChip === 5000 ? 'border-2 border-green-500 bg-green-500 rounded-full' : ''}  -ml-8  w-56 hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500`} />
-                    </div>
-                  </li>
-                </div>
+                  </span>
+                </li>
               </div>
-            </ul>
+
+              <div className="flex">
+
+                <li className={"board-chip"}>
+
+                  <div
+                    key={"chip_100"}
+                    className={getChipClasses(100)}
+                    onClick={() => onChipClick(100)}
+                  >
+                    <img src="/100.png" alt="" className={` ${getChipClasses(1)} ${states.chipsData.selectedChip === 100 ? 'border-2 border-green-500 bg-green-500 rounded-full' : ''}  -ml-14  w-56 hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500`} />
+
+                  </div>
+                </li>
+
+                <li className={"board-chip"}>
+                  <div
+                    key={"chip_500"}
+                    className={getChipClasses(500)}
+                    onClick={() => onChipClick(500)}
+                  >
+                    <img src="/500.png" alt="" className={` ${getChipClasses(1)} ${states.chipsData.selectedChip === 500 ? 'border-2 border-green-500 bg-green-500 rounded-full' : ''}  -ml-12  w-56 hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500`} />
+                  </div>
+                </li>
+                <li className={"board-chip"}>
+                  <div
+                    key={"chip_1000"}
+                    className={getChipClasses(1000)}
+                    onClick={() => onChipClick(1000)}
+                  >
+                    <img src="/1000.png" alt="" className={` ${getChipClasses(1)} ${states.chipsData.selectedChip === 1000 ? 'border-2 border-green-500 bg-green-500 rounded-full' : ''}  -ml-10  w-56 hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500`} />
+                  </div>
+                </li>
+                <li className={"board-chip"}>
+                  <div
+                    key={"chip_5000"}
+                    className={getChipClasses(5000)}
+                    onClick={() => onChipClick(5000)}
+                  >
+                    <img src="/5000.png" alt="" className={` ${getChipClasses(1)} ${states.chipsData.selectedChip === 5000 ? 'border-2 border-green-500 bg-green-500 rounded-full' : ''}  -ml-8  w-56 hover:bg-green-500 rounded-full hover:border-2 hover:border-green-500`} />
+                  </div>
+                </li>
+              </div>
+            </div>
+          </ul>
+        </div>
+      </div>
+
+      <div className="">
+        {/** Wheel DIV */}
+        <motion.div
+          className={isWheelHidden ? " flex w-full justify-center" : "  flex w-full justify-center "}
+          // initial={{ opacity: 1, scale: 1 }}
+          // animate={{ opacity: 1, scale: isWheelZoomed ? 2.5 : 1 }}
+          // exit={{ opacity: 1, scale: 1 }}
+          transition={{ ease: 'easeOut', duration: 7 }} // Adjust the duration as needed
+        >
+
+          <Wheel rouletteData={states.rouletteData} number={states.number} winningNumber={winningNumber} />
+
+        </motion.div>
+        {/**END OF WHEEL DIV */}
+
+        <div className={isWheelHidden ? "w-[100%] mt-[18.5%] absolute" : "w-[100%] mt-[18.5%]  absolute"}>
+          <Board
+            onCellClick={onCellClick}
+            chipsData={states.chipsData}
+            winningNumber={winningNumber}
+            rouletteData={states.rouletteData}
+
+          />
+          <div>
+
           </div>
+          <div className="-mt-[15.6%] w-[100%]">
+            <div className=" w-[100%] flex justify-start">
+              <img src="/amt.png" className="h-6   absolute  z-0 ml-[-1.5%] brightness-150 " />
+              <h1 className="text-white absolute h-6 mt-[1.1%] font-bold z-10 ml-[3%] text-[10px] ">{totalChipSum}</h1>
+            </div>
+
+
+            <div className=" flex justify-center">
+              <img src="/status.png" className="w-[78%]" />
+            </div>
+            <div className=" w-[100%] flex justify-end">
+              <img src="/exit.png" onClick={handleLogout} className="h-5 cursor-pointer -mt-7  absolute  z-0 flex justify-end brightness-150 " />
+
+            </div>
+          </div>
+
+          <div className="BETOK CANCEL flex   w-screen  mt-[-9%] justify-end -ml-24   ">
+            <img src="/take final.png" className={` h-6 -mt-[18%] absolute `} />
+
+            <Button
+              variant="gradient" gradient={{ from: 'orange', to: 'red' }} size="sm" onClick={() => placeBet()} >
+              {/* <img src="/betok.png" className={classNames("bg absolute h-5 -mt-[39%] rounded-full ", { 'bg-green-400  animate-pulse': states.chipsData.placedChips.size > 0 })} /> */}
+              <img
+                src="/betok.png"
+                className={`bg absolute h-5 rounded-full 
+                -mt-[17.5%]
+                } ${(timeDiff > 10 && states.chipsData.placedChips.size > 0) ?
+                    'bg-green-500 animate-pulse rounded-full' :
+                    ''
+                  }`}
+              />
+            </Button>
+
+
+          </div>
+          <div className="flex justify-end w-screen -ml-44 ">
+            <Button variant="gradient" gradient={{ from: '#ed6ea0', to: '#ec8c69', deg: 35 }} size="xl" onClick={() => clearBet()} >
+              <img src="/cancel.png" className={"h-5 absolute -mt-[14.5%] "} />
+
+            </Button>
+          </div>
+
         </div>
 
-        {/* <div className="flex gap-x-10">
+      </div>
+
+
+      {/***CHIPS CONTAINER */}
+
+      {/* <div className="flex gap-x-10">
         <li className={"board-chip"}>
           <span key={"chip_10"}>
             <div
@@ -667,9 +595,9 @@ const RouletteWrapper: React.FC<RouletteWrapperProps> = (props) => {
       </div> */}
 
 
-      </div >
+    </div >
 
-    </>
+
   );
 }
 
@@ -702,7 +630,7 @@ export async function getServerSideProps() {
 
     // Call the getWinningNumber API only when timeToDraw is less than 1 second
     if (timeDiff < 1) {
-      const response = await fetch('https://funroulettedemo.vercel.app/api/getWinningNumber');
+      const response = await fetch('http://localhost:3000/api/getWinningNumber');
       const data = await response.json();
       winningNumber = data.winningNumber;
     }

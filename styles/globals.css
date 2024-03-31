@@ -21,23 +21,24 @@ body {
 } */
 
 .transformed-div {
-  transform: rotateX(65deg) rotateY(2deg);
+  transform: rotateX(55deg) rotateY(2deg);
 
 }
 
 .roulette-wheel {
   float: left;
   width: 380px;
-
   height: 380px;
+  scale: 65%;
   border-radius: 100%;
-  /* background-image: url(/public/roulette_1.jpg); */
-  background-size: 380px 380px;
-  shape-outside: circle(190px);
-  margin: 0 0 1em 1em;
+  background-image: url(/wheelcontainer.png);
+  background-size: 380px 420px;
+  shape-outside: circle(190px); 
+
   box-shadow: 2px 10px 30px rgba(0, 0, 0, 0.4);
-  position: relative;
+
   touch-action: none;
+  position: relative;
   overflow: visible;
 }
 
@@ -45,7 +46,7 @@ body {
 @media screen and (max-width: 2640px) {
   .roulette-wheel {
     float: none;
-    margin: 1em auto;
+    /* margin: 1em auto; */
   }
 }
 
@@ -79,27 +80,33 @@ body {
   will-change: transform;
 }
 
-/* .roulette-wheel .layer-2 {
-  background-image: url(/public/roulette_2.png);
+.roulette-wheel .layer-2 {
+  background-image: url(/roulette_22.png);
+  scale: 88%;
+  margin-top: -5%;
 }
 
 .roulette-wheel .layer-3 {
-  background-image: url(/public/roulette_3.png);
+  background-image: url(/roulette_33.png);
+  scale: 46%;
+  margin-top: -5%;
 }
 
 .roulette-wheel .layer-4 {
-  background-image: url(/public/roulette_4.png);
+  background-image: url(/ring.png);
+  scale: 40%;
+  margin-top: -5%;
 }
 
 .roulette-wheel .layer-5 {
   background-image: url(/public/roulette_5.png);
 } */
 
-.roulette-wheel svg {
+/* .roulette-wheel svg {
   position: absolute;
   top: 0;
   left: 0;
-}
+} */
 
 .roulette-wheel circle {
   cursor: pointer;
@@ -116,7 +123,7 @@ body {
   transform: translateY(-116px);
   top: 50%;
   left: 50%;
-  margin: -7px;
+  margin: -7px    ;
   will-change: transform;
 }
 
@@ -133,11 +140,10 @@ body {
 .roulette-board-grid-numbers {
   display: grid;
   width: 100%;
-  height: 70%;
-  margin-left: 3%;
+  height: 70%;  
   margin-right: 23px;
-  margin-top: 10px;
-  margin-bottom: 17px;
+  margin-top: 4.5px;
+ 
 }
 
 .roulette-board-grid-other {
@@ -146,8 +152,8 @@ body {
   height: 50px;
   margin-left: 25px;
   margin-right: 23px;
-  margin-top: -20px;
-  margin-bottom: 17px;
+  margin-top: 6px;
+  margin-bottom: 7px;
 }
 
 #app table,
@@ -271,11 +277,11 @@ div.chip-5-placed {
   background-size: 30px 30px;
 } */
 
-.roulette-actions {
+/* .roulette-actions {
   display: block;
   position: relative;
   height: 150px;
-}
+} */
 
 .chipValue {
   position: relative;
@@ -302,7 +308,7 @@ div.chip-5-placed {
   z-index: 10;
 }
 
-.winning-cell {
+.winning-number {
   background-color: yellow;
   /* Set the background color to yellow */
   color: black;
